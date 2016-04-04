@@ -1,2 +1,20 @@
-# osm-br
-Kas ar brezhoneg d'an diaz roadennoù OpenStreetMap
+# API
+
+## FR
+
+Cette API offre les méthodes suivantes :
+
+/kerofis/
+
+  /infos/
+
+  /stats/
+
+  /search/
+
+
+/infos/
+
+/stats/
+
+/search/
