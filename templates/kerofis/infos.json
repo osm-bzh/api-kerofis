@@ -1,6 +1,0 @@
-{
-    "infos": {
-        "name": "kerofis database",
-        "last_file_import": "{{ date_last_import }}"
-    }
-}

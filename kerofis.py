@@ -68,7 +68,11 @@ def infos():
       date_last_import = str(record[0])
 
       # pass the data to the JSON template
-      return render_template('kerofis/infos.json', date_last_import=date_last_import)
+      return jsonify(
+        name = "kerofis database",
+        last_file_import = date_last_import,
+        file_imports = {}
+      )
 
       # closing cursor and connection to the database
       pgCursor.close()
