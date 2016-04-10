@@ -5,6 +5,9 @@
 from flask import Flask
 from flask import render_template
 
+import psycopg2
+
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 app = Flask(__name__)
 
@@ -19,8 +22,22 @@ def index():
 def infos():
     #return "API kerofis : infos"
 
-    return render_template('kerofis/infos.json', date_last_import='2016-02-09')
+    try:
+        conn = psycopg2.connect("dbname='osm-br' user='osmbr' host='localhost' password='osmbr'")
+        #return "connexion à la base : OK"
 
+        cur = conn.cursor()
+        cur.execute("""SELECT * FROM v_infos_deiziad_restr LIMIT 1""")
+        # get only first record
+        record = cur.fetchone()
+        date_last_import = str(record[0])
+        return render_template('kerofis/infos.json', date_last_import=date_last_import)
+
+
+    except:
+        return "I am unable to connect to the database"
+
+    
 
 @app.route("/kerofis/stats")
 def stats():
