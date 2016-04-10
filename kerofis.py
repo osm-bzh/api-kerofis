@@ -95,6 +95,11 @@ def internal_error(error):
     response = Response(strResponse, status=500, mimetype='text/html')
     return response
 
+@app.errorhandler(404)
+def internal_error(error):
+    strResponse = str(error)
+    response = Response(strResponse, status=404, mimetype='text/html')
+    return response
 
 #-------------------------------------------------------------------------------
 
