@@ -29,7 +29,7 @@ Retourne un ensemble d'informations globales sur la base de données :
 
 [TODO]
 
-``` /kerofis/search/municipalities ```
+``` /kerofis/municipalities ```
 
 Renvoie la liste (non paginée) de toutes les communes contenues dans la base de données.
 
@@ -45,9 +45,13 @@ Renvoie la liste (non paginée) de toutes les communes contenues dans la base de
 }
 ```
 
-``` /kerofis/search/municipalities/search/ ```
+``` /kerofis/municipalities/search/ ```
 
 Renvoie une liste de communes, en fonction de 3 critères de recherche :
 - code insee :  ```insee={insee}```
 - nom en breton : ```name:br={name:br}```
 - nom en français : ```name:fr={name:fr}```
+
+Si le code INSEE ne contient que 2 chiffres, une recherche départementale sera effectuée. Exemple : _/kerofis/municipalities/search/?insee=29_
+
+
