@@ -42,13 +42,22 @@ sConnPostgre = "host='localhost' dbname='osm-br' user='osmbr' password='osmbr'"
 
 
 #-------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------
 
 @app.route("/kerofis/")
 def index():
     return "API kerofis : index"
 
 
+
 #-------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------
+
+# /kerofis/infos
+# -> return global informations on the kerofis database
+#  last date import / refresh
+#  array of all the imports
+
 
 @app.route("/kerofis/infos")
 def infos():
@@ -88,10 +97,9 @@ def infos():
 
 
 #-------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------
 
-# /kerofis/stats/municipalities
-# /kerofis/stats/municipalities/insee/{code_insee}
-# /kerofis/stats/municipalities/name/{name}
+# /kerofis/stats/
 
 
 @app.route("/kerofis/stats")
@@ -100,6 +108,18 @@ def stats():
     return "API kerofis : stats"
     # TODO renvoyer plutôt une page HTML explicative des méthodes"""
 
+
+
+#-------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------
+
+# /kerofis/municipalities
+# -> return all municipalities
+
+# /kerofis/municipalities/search/{insee}
+# /kerofis/municipalities/search/{name:br}
+# /kerofis/municipalities/search/{name:fr}
+# -> return 0, 1 or more municipality
 
 
 @app.route("/kerofis/municipalities")
@@ -181,19 +201,102 @@ def municipalities_search():
     # get all arguments
     code_insee = request.args.get('insee', '')
     name_br = request.args.get('name:br', '')
+    name_fr = request.args.get('name:fr', '')
+
+    sSQL = ""
+
+    if (code_insee != '') :
+      # search by code insee
+      # if lenght = 2 -> search by departement
+      if len(code_insee) == 2 :
+        sSQL = "SELECT * FROM v_stats_kumun  WHERE insee LIKE '" + code_insee + "%'"
+        return municipalities_search_query(sSQL)
+        pass
+      # if lenght = 5 -> searching one municipality
+      if len(code_insee) == 5 :
+        sSQL = "SELECT * FROM v_stats_kumun  WHERE insee = '" + code_insee + "'"
+        return municipalities_search_query(sSQL)
+        pass
+      # else : output error
+      else :
+        return "abort code insee search"
+        abort(400)
+        pass
+    
+    if (name_br != '') :
+      # search by breton name
+      if len(name_br) < 3 :
+        # return error 400 TODO : customize error message
+        abort(400)
+      else :
+        sSQL = "SELECT * FROM v_stats_kumun  WHERE LOWER(name_br) LIKE LOWER('%" + name_br + "%')"
+        return municipalities_search_query(sSQL)
+        pass
+    
+    if (name_fr != '') :
+      # search by french name
+      if len(name_fr) < 3 :
+        # return error 400 TODO : customize error message
+        abort(400)
+      else :
+        sSQL = "SELECT * FROM v_stats_kumun  WHERE LOWER(name_fr) LIKE LOWER('%" + name_fr + "%')"
+        return municipalities_search_query(sSQL)
+        pass
+
+    # if nothing -> error 400
+    abort(400)
+    pass
 
 
-    return "code_insee = " + code_insee + "<br />name:br = " + name_br
-    #return code_insee
+def municipalities_search_query(sSQL):
 
-@app.route("/kerofis/municipalities/search/insee/<code_insee>")
-def municipalities_search_insee(code_insee):
-    return code_insee
+    # perform the query
+    try:
+      pgDB = psycopg2.connect(sConnPostgre)
+      pgCursor = pgDB.cursor()
 
-@app.route("/kerofis/municipalities/search/name/<name>")
-def municipalities_search_name(name):
-    return name
+      pgCursor.execute(sSQL)
+      records = pgCursor.fetchall()
 
+      # declare array + counter
+      json_array = []
+      loop_counter = 0
+
+      # loop
+      for record in records:
+        json_str = "{'insee':'" + record[0] + "',"
+        json_str += "'name:br':'" + record[1] + "',"
+        json_str += "'name:fr':'" + record[2] + "',"
+        json_str += "'nb': " + str(record[3]) + "}"
+        json_array.append(json_str)
+        loop_counter += 1
+
+      # then return a beautiful json
+      return jsonify(
+        count = loop_counter,
+        municipalities = json_array
+      )
+
+      # closing cursor and connection to the database
+      pgCursor.close()
+      pgDB.close()
+      pass
+
+    except Exception, e:
+      # out the error to the log
+      track= get_current_traceback(skip=1, show_hidden_frames=True, ignore_system_exceptions=False)
+      track.log()
+      abort(500)
+      #raise e
+    
+    #return sSQL
+
+
+
+
+
+
+#-------------------------------------------------------------------------------
 #-------------------------------------------------------------------------------
 
 @app.route("/kerofis/search/")
@@ -202,8 +305,15 @@ def search():
 
 
 
+
+#-------------------------------------------------------------------------------
 #-------------------------------------------------------------------------------
 
+@app.errorhandler(400)
+def internal_error(error):
+    strResponse = str(error)
+    response = Response(strResponse, status=400, mimetype='text/html')
+    return response
 
 @app.errorhandler(500)
 def internal_error(error):
@@ -218,6 +328,8 @@ def internal_error(error):
     return response
 
 
+
+#-------------------------------------------------------------------------------
 #-------------------------------------------------------------------------------
 
 
