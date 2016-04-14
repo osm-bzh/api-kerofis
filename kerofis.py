@@ -145,9 +145,10 @@ def municipalities_index():
 
       # loop on each record to built handmade json
       for record in records:
-        json_str = "{'insee': '" + record[0] + "',"
-        json_str += "'name': '" + record[1] + "',"
-        json_str += "'nb': " + str(record[2]) + "}"
+        json_str = "{'insee':'" + record[0] + "',"
+        json_str += "'name:br':'" + record[1] + "',"
+        json_str += "'name:fr':'" + record[2] + "',"
+        json_str += "'nb': " + str(record[3]) + "}"
         json_array.append(json_str)
 
       # then return a beautiful json
@@ -172,12 +173,26 @@ def municipalities_index():
 
 
 
-@app.route("/kerofis/stats/municipalities/insee/<code_insee>")
-def stats_communes_filter_insee(code_insee):
-    
+@app.route("/kerofis/municipalities/search/", methods=['GET'])
+def municipalities_search():
+    # search by  insee  OR  name_fr  OR name_br
+    # currently : name:fr not present in kerOfis database
+
+    # get all arguments
+    code_insee = request.args.get('insee', '')
+    name_br = request.args.get('name:br', '')
+
+
+    return "code_insee = " + code_insee + "<br />name:br = " + name_br
+    #return code_insee
+
+@app.route("/kerofis/municipalities/search/insee/<code_insee>")
+def municipalities_search_insee(code_insee):
     return code_insee
 
-
+@app.route("/kerofis/municipalities/search/name/<name>")
+def municipalities_search_name(name):
+    return name
 
 #-------------------------------------------------------------------------------
 
