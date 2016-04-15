@@ -338,33 +338,57 @@ def kerofis_search():
     name_fr = request.args.get('name:fr', '')
     sortby = request.args.get('sortby', '')
 
-    #return name_fr
+    type_code_insee = ''
+
+    # basic tests
+    if len(code_insee) == 1 :
+      if code_insee == '*':
+        # ok
+        type_code_insee = 'all'
+        pass
+    elif len(code_insee) == 5 :
+      # test if integer TODO
+      # ok
+      type_code_insee = 'normal'
+      pass
+    else:
+      return 'pb : code insee trop court'
+
+
+    #return 'ok'
+    #pass
 
     sSQL = "SELECT niv, deiziad_degemer, insee, kumun, rummad, stumm_orin, stumm_dibab FROM kerofis  WHERE"
 
-    # code insee
-    # if (code_insee == '*'):
-
-    # elif (code_insee != '*') :
-    #   # if lenght = 5 -> searching one municipality
-    #   if len(code_insee) == 5 :
-    #     sSQL += " insee='" + str(code_insee) + "'"
-    #   # else : output error
-    #   else :
-    #     return "need a code insee"
-    #     abort(400)
-    #     pass
+    #return type_code_insee + ' | ' + name_fr
     
-    # name:fr
-    if (name_fr != '' && (code_insee !='*' && code_insee != '') :
+    # name:fr : classic search : name fr in one municipality
+    if (name_fr != '' and type_code_insee == 'normal') :
+
+      # if lenght < 3 -> nothing
+      if len(name_fr) >= 3 :
+        sSQL += " insee='" + str(code_insee) + "' AND LOWER(stumm_dibab) LIKE '%" + name_fr.lower() + "%' #exclude# ORDER BY stumm_dibab ASC"
+      # else : output error
+      else :
+        abort(400)
+        pass
+    
+    # name:fr : earch on name fr in all the municipalities
+    elif (name_fr != '' and type_code_insee == 'all') :
+
       # if lenght < 3 -> nothing
       if len(name_fr) >= 3 :
         sSQL += " LOWER(stumm_dibab) LIKE '%" + name_fr.lower() + "%' #exclude# ORDER BY stumm_dibab ASC"
       # else : output error
       else :
-        #return "abort code insee search"
         abort(400)
         pass
+
+    else :
+      #return 'pb' + name_fr
+      abort(400)
+      pass
+
 
 
     # exclude municipality record
@@ -397,11 +421,11 @@ def kerofis_search():
         stumm_dibab = record[6]
 
         # building the json
-        json_str = "{'id':'" + str(niv) + "',"
-        json_str = "{'validation_date':'" + str(deiziad_degemer) + "',"
         json_str = "{'insee':'" + insee + "',"
-        json_str = "{'municipality':'" + kumun + "',"
-        json_str = "{'type':'" + rummad + "',"
+        json_str += "{'municipality':'" + kumun + "',"
+        json_str += "{'validation_date':'" + str(deiziad_degemer) + "',"
+        json_str += "{'id':'" + str(niv) + "',"
+        json_str += "{'type':'" + rummad + "',"
         json_str += "'name:br':'" + stumm_orin + "',"
         json_str += "'name:fr':'" + stumm_dibab + "}"
         json_array.append(json_str)
