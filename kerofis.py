@@ -364,32 +364,47 @@ def kerofis_search():
     
     # name:fr : classic search : name fr in one municipality
     if (name_fr != '' and type_code_insee == 'normal') :
-
       # if lenght < 3 -> nothing
       if len(name_fr) >= 3 :
-        sSQL += " insee='" + str(code_insee) + "' AND LOWER(stumm_dibab) LIKE '%" + name_fr.lower() + "%' #exclude# ORDER BY stumm_dibab ASC"
+        sSQL += " insee='" + str(code_insee) + "' AND LOWER(stumm_orin) LIKE '%" + name_fr.lower() + "%' #exclude# ORDER BY stumm_orin ASC"
       # else : output error
       else :
         abort(400)
         pass
-    
     # name:fr : earch on name fr in all the municipalities
     elif (name_fr != '' and type_code_insee == 'all') :
-
       # if lenght < 3 -> nothing
       if len(name_fr) >= 3 :
-        sSQL += " LOWER(stumm_dibab) LIKE '%" + name_fr.lower() + "%' #exclude# ORDER BY stumm_dibab ASC"
+        sSQL += " LOWER(stumm_orin) LIKE '%" + name_fr.lower() + "%' #exclude# ORDER BY stumm_orin ASC"
       # else : output error
       else :
         abort(400)
         pass
-
     else :
-      #return 'pb' + name_fr
       abort(400)
       pass
 
-
+    # # name:br : classic search : name br in one municipality
+    # if (name_br != '' and type_code_insee == 'normal') :
+    #   # if lenght < 3 -> nothing
+    #   if len(name_br) >= 3 :
+    #     sSQL += " insee='" + str(code_insee) + "' AND LOWER(stumm_dibab) LIKE '%" + name_br.lower() + "%' #exclude# ORDER BY stumm_dibab ASC"
+    #   # else : output error
+    #   else :
+    #     abort(400)
+    #     pass
+    # # name:br : earch on name br in all the municipalities
+    # elif (name_br != '' and type_code_insee == 'all') :
+    #   # if lenght < 3 -> nothing
+    #   if len(name_br) >= 3 :
+    #     sSQL += " LOWER(stumm_dibab) LIKE '%" + name_fr.lower() + "%' #exclude# ORDER BY stumm_dibab ASC"
+    #   # else : output error
+    #   else :
+    #     abort(400)
+    #     pass
+    # else :
+    #   abort(400)
+    #   pass
 
     # exclude municipality record
     sSQL = sSQL.replace("#exclude#", " AND rummad <> 'Kumun'")
