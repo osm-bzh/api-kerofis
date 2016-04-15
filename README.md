@@ -15,8 +15,12 @@ Retourne un ensemble d'informations globales sur la base de données :
 
 ```json
 {
+  "attribution_br": "kerOfis gant osm-br", 
+  "attribution_en": "kerOfis by osm-br", 
+  "attribution_fr": "kerOfis par osm-br", 
   "file_imports": {}, 
   "last_file_import": "2016-02-08", 
+  "licence": "Licence Ouverte / Open Licence", 
   "name": "kerofis database"
 }
 ```
@@ -35,7 +39,11 @@ Renvoie la liste (non paginée) de toutes les communes contenues dans la base de
 
 ```json
 {
+  "attribution_br": "kerOfis gant osm-br", 
+  "attribution_en": "kerOfis by osm-br", 
+  "attribution_fr": "kerOfis par osm-br", 
   "count": "4", 
+  "licence": "Licence Ouverte / Open Licence", 
   "municipalities": [
     "{'insee':'29152','name:br':'Motrev','name:fr':'Motreff','nb': 83}", 
     "{'insee':'29174','name:br':'Ploneour-Lanwern','name:fr':'Plon\u00e9our-Lanvern','nb': 481}", 
