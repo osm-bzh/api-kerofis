@@ -100,8 +100,8 @@ def infos():
       # out the error to the log
       track= get_current_traceback(skip=1, show_hidden_frames=True, ignore_system_exceptions=False)
       track.log()
-      # send ton special function that response HTTP 500 error
-      abort(500)
+      # return customized error message in JSON
+      return jsonify(error = str(e)), 500
 
 
 
@@ -203,8 +203,8 @@ def municipalities_index():
       # out the error to the log
       track= get_current_traceback(skip=1, show_hidden_frames=True, ignore_system_exceptions=False)
       track.log()
-      # send ton special function that response HTTP 500 error
-      abort(500)
+      # error
+      return jsonify(error = str(e)), 500
 
 
 
@@ -233,15 +233,15 @@ def municipalities_search():
         pass
       # else : output error
       else :
-        #return "abort code insee search"
-        abort(400)
+        # error
+        return jsonify(error = "code insee : bad argument"), 400
         pass
     
     if (name_br != '') :
       # search by breton name
       if len(name_br) < 3 :
-        # return error 400 TODO : customize error message
-        abort(400)
+        # error
+        return jsonify(error = "name:br argument is too short"), 400
       else :
         sSQL = "SELECT * FROM v_stats_kumun  WHERE LOWER(name_br) LIKE LOWER('%" + name_br + "%')"
         return municipalities_search_query(sSQL)
@@ -250,15 +250,15 @@ def municipalities_search():
     if (name_fr != '') :
       # search by french name
       if len(name_fr) < 3 :
-        # return error 400 TODO : customize error message
-        abort(400)
+        # error
+        return jsonify(error = "name:fr argument is too short"), 400
       else :
         sSQL = "SELECT * FROM v_stats_kumun  WHERE LOWER(name_fr) LIKE LOWER('%" + name_fr + "%')"
         return municipalities_search_query(sSQL)
         pass
 
-    # if nothing -> error 400
-    abort(400)
+    # if nothing -> error 500
+    return jsonify(error = "error in municipality search"), 500
     pass
 
 
@@ -304,8 +304,8 @@ def municipalities_search_query(sSQL):
       # out the error to the log
       track= get_current_traceback(skip=1, show_hidden_frames=True, ignore_system_exceptions=False)
       track.log()
-      abort(500)
-      #raise e
+      # error
+      return jsonify(error = str(e)), 500
     
     #return sSQL
 
