@@ -321,102 +321,171 @@ def municipalities_search_query(sSQL):
 # -> return all records for one municipality
 # 
 # /kerofis/search/?
-#   insee={insee} : 12345 OR *
-#   type={type} : cf table v_stats_kumun_rummad
-#   name:br={name:br} OR name:fr={name:fr}
+#   insee={insee} [mandatory] : '12345' OR *
+#   lang={br|fr} [mandatory] : langage of the name to request
+#   name={name} [mandatory] : 'XXXX' OR *
+#   type={type} [optionnal] : cf table v_stats_kumun_rummad
+#   sortby={br_asc|br_desc|fr_asc|fr_desc} [optionnal] : sorting key
 # 
 
 
 @app.route("/kerofis/search/", methods=['GET'])
 def kerofis_search():
-    # search by name_fr OR name_br + insee (optional)
 
     # get all arguments
-    code_insee = request.args.get('insee', '')
-    stype = request.args.get('type', '')
-    name_br = request.args.get('name:br', '')
-    name_fr = request.args.get('name:fr', '')
-    sortby = request.args.get('sortby', '')
+    code_insee = request.args.get('insee', '')  # mandatory
+    lang = request.args.get('lang', '')         # mandatory
+    name = request.args.get('name', '')         # mandatory
+    stype = request.args.get('type', '')        # optionnal
+    sortby = request.args.get('sortby', '')     # optionnal -> default = requested langage + ascendant
 
-    type_code_insee = ''
+    args = "args = code_insee:"+code_insee+" | lang:"+lang+" | name:"+name+" | type:"+stype
 
-    # basic tests
+    # for say if the query args are welcomed
+    control = False
+
+    #
+    # basic tests : insee
     if len(code_insee) == 1 :
       if code_insee == '*':
         # ok
-        type_code_insee = 'all'
+        control = True
         pass
+      else:
+        # error
+        control = False
+        # return customized error message in JSON
+        return jsonify(error = "bad code insee argument"), 400
     elif len(code_insee) == 5 :
       # test if integer TODO
       # ok
-      type_code_insee = 'normal'
+      control = True
       pass
     else:
-      return 'pb : code insee trop court'
+      # error : too short
+      control = False
+      # return customized error message in JSON
+      return jsonify(error = "bad code insee argument"), 400
 
-
-    #return 'ok'
-    #pass
-
-    sSQL = "SELECT niv, deiziad_degemer, insee, kumun, rummad, stumm_orin, stumm_dibab FROM kerofis  WHERE"
-
-    #return type_code_insee + ' | ' + name_fr
-    
-    # name:fr : classic search : name fr in one municipality
-    if (name_fr != '' and type_code_insee == 'normal') :
-      # if lenght < 3 -> nothing
-      if len(name_fr) >= 3 :
-        sSQL += " insee='" + str(code_insee) + "' AND LOWER(stumm_orin) LIKE '%" + name_fr.lower() + "%' #exclude# ORDER BY stumm_orin ASC"
-      # else : output error
-      else :
-        abort(400)
+    #
+    # basic tests : lang
+    if len(lang) == 2 :
+      if (lang == "fr") or (lang == "br") :
+        # ok
+        control = True
         pass
-    # name:fr : earch on name fr in all the municipalities
-    elif (name_fr != '' and type_code_insee == 'all') :
-      # if lenght < 3 -> nothing
-      if len(name_fr) >= 3 :
-        sSQL += " LOWER(stumm_orin) LIKE '%" + name_fr.lower() + "%' #exclude# ORDER BY stumm_orin ASC"
-      # else : output error
       else :
-        abort(400)
-        pass
+        # error
+        control = False
+        # return customized error message in JSON
+        return jsonify(error = "bad langage argument"), 400
     else :
-      abort(400)
-      pass
+      # error
+      control = False
+      # return customized error message in JSON
+      return jsonify(error = "bad langage argument"), 400
 
-    # # name:br : classic search : name br in one municipality
-    # if (name_br != '' and type_code_insee == 'normal') :
-    #   # if lenght < 3 -> nothing
-    #   if len(name_br) >= 3 :
-    #     sSQL += " insee='" + str(code_insee) + "' AND LOWER(stumm_dibab) LIKE '%" + name_br.lower() + "%' #exclude# ORDER BY stumm_dibab ASC"
-    #   # else : output error
-    #   else :
-    #     abort(400)
-    #     pass
-    # # name:br : earch on name br in all the municipalities
-    # elif (name_br != '' and type_code_insee == 'all') :
-    #   # if lenght < 3 -> nothing
-    #   if len(name_br) >= 3 :
-    #     sSQL += " LOWER(stumm_dibab) LIKE '%" + name_fr.lower() + "%' #exclude# ORDER BY stumm_dibab ASC"
-    #   # else : output error
-    #   else :
-    #     abort(400)
-    #     pass
-    # else :
-    #   abort(400)
-    #   pass
+    #
+    # basic tests : name
+    # first : trim spaces
+    name = name.replace(" ","")
+    # checks
+    if (name == "*") and (code_insee == "*") :
+      # not allowed to return all the database
+      return jsonify(error = "not allowed to return all the database : supply insee or name argument"), 400
 
-    # exclude municipality record
-    sSQL = sSQL.replace("#exclude#", " AND rummad <> 'Kumun'")
-    #return sSQL
+    if (name != "*") :
+      if len(name) < 3 :
+        # error
+        control = False
+        # return customized error message in JSON
+        return jsonify(error = "name argument too short"), 400
+      elif len(name) > 50 :
+        # error
+        control = False
+        # return customized error message in JSON
+        return jsonify(error = "name argument too long"), 400
 
+    #
+    # basic tests : type of objects queried
+    # TODO
+    if stype :
+      control = False
+      return jsonify(error = "type argument not yet managed"), 500
+
+    #
+    # basic tests : sort by
+    if sortby :
+      # test all the cases
+      if (sortby == "fr_asc") or (sortby == "fr_desc") or (sortby == "br_asc") or (sortby == "br_desc") :
+        control = True
+        pass
+      else :
+        # error
+        control = False
+        # return customized error message in JSON
+        return jsonify(error = "bad sortby argument"), 400
+    else :
+      # apply the queried langage + ascendant sort
+      sortby = lang + "_asc"
+
+
+
+    # test control, in case of…
+    if control == False :
+      # stop
+      return jsonify(error = "something went wrong, check arguments"), 400
+    else :
+      # all is right, let's built the query
+      sSQL = "SELECT niv, deiziad_degemer, insee, kumun, rummad, stumm_orin, stumm_dibab FROM kerofis WHERE"
+      
+      # code insee + name
+      if (code_insee != "*") and (name != "*") : sSQL += " insee='" + str(code_insee) + "' AND"
+      # code insee alone
+      elif (code_insee != "*") and (name == "*") : sSQL += " insee='" + str(code_insee) + "'"
+
+
+      # langage impacts column choice for the name request
+      # comparison is done case insensitive
+      # TODO : manage accents
+      # first : define if query an entire municipality or not
+      if (name != "*") : 
+        if (lang == "fr") : sSQL += " LOWER(stumm_orin) LIKE '%" + name.lower() + "%'"
+        elif (lang == "br") : sSQL += " LOWER(stumm_dibab) LIKE '%" + name.lower() + "%'"
+      # no need else
+
+      # type
+      # TODO
+      # exclude municipality record because we looking for way or POI
+      sSQL += " AND rummad <> 'Kumun'"
+
+      # sorting
+      if (sortby == "fr_asc") : sSQL += " ORDER BY stumm_orin ASC"
+      elif (sortby == "fr_desc") : sSQL += " ORDER BY stumm_orin DESC"
+      elif (sortby == "br_asc") : sSQL += " ORDER BY stumm_dibab ASC"
+      elif (sortby == "br_desc") : sSQL += " ORDER BY stumm_dibab DESC"
+
+      # for test / debug
+      #return jsonify(query = sSQL, lang = lang), 404
+
+      # go to the query
+      return kerofis_search_query(sSQL)
+      #pass
+
+    #args += " | sortby:"+sortby
+    #return args + " | control = " + str(control) + "   FIN"
+    pass
+
+
+
+def kerofis_search_query(sql):
 
     # perform the query
     try:
       pgDB = psycopg2.connect(sConnPostgre)
       pgCursor = pgDB.cursor()
 
-      pgCursor.execute(sSQL)
+      pgCursor.execute(sql)
       records = pgCursor.fetchall()
 
       # declare array + counter
@@ -465,7 +534,7 @@ def kerofis_search():
       # out the error to the log
       track= get_current_traceback(skip=1, show_hidden_frames=True, ignore_system_exceptions=False)
       track.log()
-      abort(500)
+      return jsonify(error = str(e)), 500
       #raise e
 
 
