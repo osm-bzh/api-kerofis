@@ -506,10 +506,10 @@ def kerofis_search_query(sql):
 
         # building the json
         json_str = "{'insee':'" + insee + "',"
-        json_str += "{'municipality':'" + kumun + "',"
-        json_str += "{'validation_date':'" + str(deiziad_degemer) + "',"
-        json_str += "{'id':'" + str(niv) + "',"
-        json_str += "{'type':'" + rummad + "',"
+        json_str += "'municipality':'" + kumun + "',"
+        json_str += "'validation_date':'" + str(deiziad_degemer) + "',"
+        json_str += "'id':'" + str(niv) + "',"
+        json_str += "'type':'" + rummad + "',"
         json_str += "'name:br':'" + stumm_orin + "',"
         json_str += "'name:fr':'" + stumm_dibab + "}"
         json_array.append(json_str)
