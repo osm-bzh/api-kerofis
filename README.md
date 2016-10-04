@@ -3,11 +3,11 @@
 ## API KerOfis
 API sur la base de données "kerOfis" libérée par l'Office publique de la langue bretonne (OPLB). Cette API offre les méthodes suivantes :
 
-``` /kerofis/ ```
+### /kerofis/
 
 [TODO]
 
-``` /kerofis/infos/ ```
+### /kerofis/infos/
 
 Retourne un ensemble d'informations globales sur la base de données :
   - date du dernier import de données
@@ -25,15 +25,15 @@ Retourne un ensemble d'informations globales sur la base de données :
 }
 ```
 
-``` /kerofis/stats/ ```
+### /kerofis/stats/ 
 
 [TODO]
 
-``` /kerofis/search/ ```
+### /kerofis/search/ 
 
 [TODO]
 
-``` /kerofis/municipalities ```
+### /kerofis/municipalities 
 
 Renvoie la liste (non paginée) de toutes les communes contenues dans la base de données.
 
@@ -53,13 +53,29 @@ Renvoie la liste (non paginée) de toutes les communes contenues dans la base de
 }
 ```
 
-``` /kerofis/municipalities/search/ ```
+### /kerofis/municipalities/ 
 
-Renvoie une liste de communes, en fonction de 3 critères de recherche :
+Renvoie la liste de toutes les communes.
+
+### /kerofis/municipalities/search/?
+
+Renvoie une liste de communes, en fonction de 4 critères de recherche :
 - code insee :  ```insee={insee}```
 - nom en breton : ```name:br={name:br}```
 - nom en français : ```name:fr={name:fr}```
+- langue de recherche : ```lang=fr``` ou ```lang=br``` 
 
 Si le code INSEE ne contient que 2 chiffres, une recherche départementale sera effectuée. Exemple : _/kerofis/municipalities/search/?insee=29_
+
+Exemples :
+- la liste des communes dans le Finistère : ```/kerofis/municipalities/search/?insee=29```
+- la liste des communes qui commence par plou : ```/kerofis/municipalities/search/?name:fr=plou```
+- recherche des voies dont le nom en fr contient min : ```/kerofis/search/?insee=*&lang=fr&name=min```
+- recherche des voies dont le nom en br contient min : ```/kerofis/search/?insee=*&lang=br&name=min```
+- toutes les voies d’une commune : ```/kerofis/search/?insee=29152&lang=br&name=*```
+- liste des objets contenant "maner" sur Ploneour-Lanwern : ```/kerofis/search/?insee=29174&lang=br&name=maner```
+- liste des lieux-dits contenant "maner" sur Ploneour-Lanwern : ```/kerofis/search/?insee=29174&lang=br&name=maner&type=K%C3%AAriadenn```
+- liste des rues contenant "maner" sur Ploneour-Lanwern : ```/kerofis/search/?insee=29174&lang=br&name=maner&type=Hent```
+
 
 
