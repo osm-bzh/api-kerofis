@@ -53,3 +53,32 @@ SERVER kerofis_csv_import
 OPTIONS (format 'csv', header 'true', delimiter ',', filename '/data/kerofis/kerofis_latest.csv');
 
 
+-- load the main table from the import table
+TRUNCATE TABLE public.kerofis ; 
+
+INSERT INTO public.kerofis
+(
+  SELECT
+    niv::bigint,
+    (CASE
+    WHEN deiziad_degemer = '0000-00-00' THEN '1970-01-01'
+    -- french to english format '04/06/2013' -> '2013-06-04'
+    ELSE CONCAT(SUBSTRING(deiziad_degemer,7,4),'-',SUBSTRING(deiziad_degemer,4,2),'-',SUBSTRING(deiziad_degemer,1,2))
+    END)::date AS deiziad_degemer,
+    insee,
+    kumun,
+    stagadenn,
+    lec_hanv,
+    (CASE
+    -- when ends with single quote
+    WHEN stagadenn LIKE '%''' THEN CONCAT(stagadenn,lec_hanv)
+    ELSE CONCAT(stagadenn,' ',lec_hanv)
+    END) AS stumm_orin,
+    rummad,
+    dibab AS stumm_dibab,
+    '2017-10-31' AS deiziad_restr
+  FROM kerofis_csv_import
+);
+
+
+
