@@ -1,7 +1,13 @@
-# API
+# API KerOfis
 
-## API KerOfis
-API sur la base de données "kerOfis" libérée par l'Office publique de la langue bretonne (OPLB). Cette API offre les méthodes suivantes :
+## Description
+Cette API utilise la base de données "kerOfis" libérée par l'Office public de la langue bretonne (OPLB).
+Le jeu de données est disponible sur [cette page](http://www.brezhoneg.bzh/211-roadennou-frank-a-wiriou.htm).
+
+
+## Utilisation
+
+Cette API offre les méthodes suivantes :
 
 ### /kerofis/
 
@@ -10,8 +16,9 @@ API sur la base de données "kerOfis" libérée par l'Office publique de la lang
 ### /kerofis/infos/
 
 Retourne un ensemble d'informations globales sur la base de données :
-  - date du dernier import de données
-  - liste des dates de tous les imports / mises à jour de la base de données
+
+- date du dernier import de données
+- liste des dates de tous les imports / mises à jour de la base de données
 
 ```json
 {
@@ -68,6 +75,7 @@ Renvoie une liste de communes, en fonction de 4 critères de recherche :
 Si le code INSEE ne contient que 2 chiffres, une recherche départementale sera effectuée. Exemple : _/kerofis/municipalities/search/?insee=29_
 
 Exemples :
+
 - la liste des communes dans le Finistère : ```/kerofis/municipalities/search/?insee=29```
 - la liste des communes qui commence par plou : ```/kerofis/municipalities/search/?name:fr=plou```
 - recherche des voies dont le nom en fr contient min : ```/kerofis/search/?insee=*&lang=fr&name=min```
