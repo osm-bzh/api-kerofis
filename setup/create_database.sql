@@ -9,7 +9,7 @@ CREATE DATABASE kerofis WITH OWNER=kerofis ENCODING=UTF8 ;
 
 -- create the main table
 CREATE TABLE public.kerofis (
-    niv numeric(7,0) NOT NULL,
+    niv bigint NOT NULL,
     deiziad_degemer date,
     insee character varying(5),
     kumun character varying(250),
