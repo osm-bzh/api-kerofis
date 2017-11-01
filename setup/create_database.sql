@@ -1,3 +1,13 @@
+
+-- create a user
+CREATE USER kerofis WITH PASSWORD 'kerofis';
+
+
+-- create the database
+CREATE DATABASE kerofis WITH OWNER=kerofis ENCODING=UTF8 ;
+
+
+-- create the main table
 CREATE TABLE kerofis (
     niv numeric(7,0) NOT NULL,
     deiziad_degemer date,
@@ -11,7 +21,7 @@ CREATE TABLE kerofis (
     deiziad_restr date
 );
 
-ALTER TABLE ONLY kerofis
+ALTER TABLE kerofis
     ADD CONSTRAINT pk_niv PRIMARY KEY (niv);
 
 CREATE INDEX idx_insee ON kerofis USING btree (insee);
