@@ -1,10 +1,10 @@
 
 
--- View: v_infos_deiziad_restr
+-- this view get the number of items per date of import version
+-- of the original data file
 
--- DROP VIEW v_infos_deiziad_restr;
-
-CREATE OR REPLACE VIEW v_infos_deiziad_restr AS 
+-- DROP VIEW infos_file_import
+CREATE OR REPLACE VIEW infos_file_import AS 
  SELECT kerofis.deiziad_restr,
     count(kerofis.deiziad_restr) AS nb
    FROM kerofis
@@ -13,11 +13,11 @@ CREATE OR REPLACE VIEW v_infos_deiziad_restr AS
 
 
 
--- View: v_kumun_listenn
+-- this view to list all the municipality
+-- id, breton name, french name
 
--- DROP VIEW v_kumun_listenn;
-
-CREATE OR REPLACE VIEW v_kumun_listenn AS 
+-- DROP VIEW municipality;
+CREATE OR REPLACE VIEW municipality AS 
  SELECT kerofis.insee,
     kerofis.kumun AS name_br,
     kerofis.stumm_orin AS name_fr
@@ -26,11 +26,12 @@ CREATE OR REPLACE VIEW v_kumun_listenn AS
   ORDER BY kerofis.insee;
 
 
--- View: v_kumun_nb
 
--- DROP VIEW v_kumun_nb;
+-- this view to get the number of name:br occurences per municipality
+-- without names of the municipality
 
-CREATE OR REPLACE VIEW v_kumun_nb AS 
+-- DROP VIEW stats_municipality_name_br;
+CREATE OR REPLACE VIEW stats_municipality_name_br AS 
  SELECT kerofis.insee,
     count(*) AS nb
    FROM kerofis
@@ -38,26 +39,25 @@ CREATE OR REPLACE VIEW v_kumun_nb AS
   ORDER BY kerofis.insee;
 
 
--- View: v_stats_kumun
 
--- DROP VIEW v_stats_kumun;
+-- municipality : names and number of name:br occurences
 
-CREATE OR REPLACE VIEW v_stats_kumun AS 
- SELECT v_kumun_listenn.insee,
-    v_kumun_listenn.name_br,
-    v_kumun_listenn.name_fr,
-    v_kumun_nb.nb
-   FROM v_kumun_listenn,
-    v_kumun_nb
-  WHERE v_kumun_listenn.insee::text = v_kumun_nb.insee::text;
+-- DROP VIEW stats_municipality;
+CREATE OR REPLACE VIEW stats_municipality AS 
+ SELECT municipality.insee,
+    municipality.name_br,
+    municipality.name_fr,
+    stats_municipality_name_br.nb
+   FROM municipality,
+    stats_municipality_name_br
+  WHERE municipality.insee::text = stats_municipality_name_br.insee::text;
 
 
 
--- View: v_stats_kumun_rummad
+-- this view to get statistics on the type of place per municipality
 
--- DROP VIEW v_stats_kumun_rummad;
-
-CREATE OR REPLACE VIEW v_stats_kumun_rummad AS 
+-- DROP VIEW stats_municipality_type_of_place;
+CREATE OR REPLACE VIEW stats_municipality_type_of_place AS 
  SELECT kerofis.insee,
     count(kerofis.rummad) AS nb,
     kerofis.rummad
@@ -67,14 +67,14 @@ CREATE OR REPLACE VIEW v_stats_kumun_rummad AS
 
 
 
--- View: v_stats_rummad
+-- this view for global statistics on type of places
 
--- DROP VIEW v_stats_rummad;
-
-CREATE OR REPLACE VIEW v_stats_rummad AS 
+-- DROP VIEW stats_type_of_place;
+CREATE OR REPLACE VIEW stats_type_of_place AS 
  SELECT kerofis.rummad,
     count(kerofis.rummad) AS nb
    FROM kerofis
   GROUP BY kerofis.rummad
   ORDER BY kerofis.rummad;
+
 

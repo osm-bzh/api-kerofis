@@ -76,7 +76,7 @@ def infos():
       pgCursor = pgDB.cursor()
 
       # the query
-      pgCursor.execute("""SELECT * FROM v_infos_deiziad_restr LIMIT 1""")
+      pgCursor.execute("""SELECT * FROM infos_file_import LIMIT 1""")
       # get only first record
       record = pgCursor.fetchone()
       date_last_import = str(record[0])
@@ -118,7 +118,7 @@ def stats():
     # TODO renvoyer plutôt une page HTML explicative des méthodes"""
 
 
-# v_stats_kumun_rummad  -->  pour avoir les formes
+# stats_municipality_type_of_place  -->  pour avoir les formes
 
 
 #-------------------------------------------------------------------------------
@@ -137,7 +137,7 @@ def stats():
 @app.route("/kerofis/municipalities/")
 def municipalities_index():
     # return a json response with the list of all the municipalities concerned in the database
-    # datas provided by the v_stats_kumun table
+    # datas provided by the stats_municipality table
     # insee | kumun | nb
 
     # return "API kerofis : stats : par commune : toutes les communes"
@@ -152,7 +152,7 @@ def municipalities_index():
       #-------------------------------------------------------------------------------
       # first : get count of municipality in the database
 
-      pgCursor.execute("""SELECT COUNT(*) AS count FROM v_stats_kumun""")
+      pgCursor.execute("""SELECT COUNT(*) AS count FROM stats_municipality""")
       oneRecord = pgCursor.fetchone()
       NbOfMunicipalities = str(oneRecord[0])
 
@@ -161,7 +161,7 @@ def municipalities_index():
       # second : loop on all the municipalities
 
       # the query
-      pgCursor.execute("""SELECT * FROM v_stats_kumun""")
+      pgCursor.execute("""SELECT * FROM stats_municipality""")
       # get all the records
       records = pgCursor.fetchall()
 
@@ -223,12 +223,12 @@ def municipalities_search():
       # search by code insee
       # if lenght = 2 -> search by departement
       if len(code_insee) == 2 :
-        sSQL = "SELECT * FROM v_stats_kumun  WHERE insee LIKE '" + code_insee + "%'"
+        sSQL = "SELECT * FROM stats_municipality  WHERE insee LIKE '" + code_insee + "%'"
         return municipalities_search_query(sSQL)
         pass
       # if lenght = 5 -> searching one municipality
       if len(code_insee) == 5 :
-        sSQL = "SELECT * FROM v_stats_kumun  WHERE insee = '" + code_insee + "'"
+        sSQL = "SELECT * FROM stats_municipality  WHERE insee = '" + code_insee + "'"
         return municipalities_search_query(sSQL)
         pass
       # else : output error
@@ -243,7 +243,7 @@ def municipalities_search():
         # error
         return jsonify(error = "name:br argument is too short"), 400
       else :
-        sSQL = "SELECT * FROM v_stats_kumun  WHERE LOWER(name_br) LIKE LOWER('%" + name_br + "%')"
+        sSQL = "SELECT * FROM stats_municipality  WHERE LOWER(name_br) LIKE LOWER('%" + name_br + "%')"
         return municipalities_search_query(sSQL)
         pass
     
@@ -253,7 +253,7 @@ def municipalities_search():
         # error
         return jsonify(error = "name:fr argument is too short"), 400
       else :
-        sSQL = "SELECT * FROM v_stats_kumun  WHERE LOWER(name_fr) LIKE LOWER('%" + name_fr + "%')"
+        sSQL = "SELECT * FROM stats_municipality  WHERE LOWER(name_fr) LIKE LOWER('%" + name_fr + "%')"
         return municipalities_search_query(sSQL)
         pass
 
@@ -324,7 +324,7 @@ def municipalities_search_query(sSQL):
 #   insee={insee} [mandatory] : '12345' OR *
 #   lang={br|fr} [mandatory] : langage of the name to request
 #   name={name} [mandatory] : 'XXXX' OR *
-#   type={type} [optionnal] : cf table v_stats_kumun_rummad
+#   type={type} [optionnal] : cf table stats_municipality_type_of_place
 #   sortby={br_asc|br_desc|fr_asc|fr_desc} [optionnal] : sorting key
 # 
 
