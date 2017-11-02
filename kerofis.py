@@ -40,17 +40,17 @@ app = Flask(__name__)
 
 sConnPostgre = "host='localhost' dbname='kerofis' user='kerofis' password='kerofis'"
 
-licence = "Licence Ouverte / Open Licence"
-attribution_en = "kerOfis by osm-br"
-attribution_fr = "kerOfis par osm-br"
-attribution_br = "kerOfis gant osm-br"
+licence = "Open Database License (ODbL) v1.0"
+attribution_en = "KerOfis by osm-bzh"
+attribution_fr = "KerOfis par osm-bzh"
+attribution_br = "KerOfis gant osm-bzh"
 
 #-------------------------------------------------------------------------------
 #-------------------------------------------------------------------------------
 
 @app.route("/kerofis/")
 def index():
-    return "API kerofis : index"
+    return "API KerOfis : index"
 
 
 
@@ -83,7 +83,7 @@ def infos():
 
       # pass the data to the JSON template
       return jsonify(
-        name = "kerOfis database",
+        name = "KerOfis data provided by Ofis publik ar brezhoneg",
         licence = licence,
         attribution_en = attribution_en,
         attribution_fr = attribution_fr,

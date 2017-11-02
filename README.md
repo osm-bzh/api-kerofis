@@ -22,13 +22,13 @@ Retourne un ensemble d'informations globales sur la base de données :
 
 ```json
 {
-  "attribution_br": "kerOfis gant osm-br", 
-  "attribution_en": "kerOfis by osm-br", 
-  "attribution_fr": "kerOfis par osm-br", 
+  "attribution_br": "KerOfis gant osm-bzh", 
+  "attribution_en": "KerOfis by osm-bzh", 
+  "attribution_fr": "KerOfis par osm-bzh", 
   "file_imports": {}, 
-  "last_file_import": "2016-02-08", 
-  "licence": "Licence Ouverte / Open Licence", 
-  "name": "kerofis database"
+  "last_file_import": "2017-10-31", 
+  "licence": "Open Database License (ODbL) v1.0", 
+  "name": "KerOfis data provided by Ofis publik ar brezhoneg"
 }
 ```
 
