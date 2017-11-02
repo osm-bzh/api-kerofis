@@ -1,7 +1,7 @@
 # API KerOfis
 
 ## Description
-Cette API utilise la base de données "kerOfis" libérée par l'Office public de la langue bretonne (OPLB).
+Cette API utilise la base de données "KerOfis" libérée par l'Office public de la langue bretonne (OPLB).
 Le jeu de données est disponible sur [cette page](http://www.brezhoneg.bzh/211-roadennou-frank-a-wiriou.htm).
 
 
@@ -40,7 +40,7 @@ Retourne un ensemble d'informations globales sur la base de données :
 
 [TODO]
 
-### /kerofis/municipalities 
+### /kerofis/municipalities/ 
 
 Renvoie la liste (non paginée) de toutes les communes contenues dans la base de données.
 
@@ -60,9 +60,6 @@ Renvoie la liste (non paginée) de toutes les communes contenues dans la base de
 }
 ```
 
-### /kerofis/municipalities/ 
-
-Renvoie la liste de toutes les communes.
 
 ### /kerofis/municipalities/search/?
 
