@@ -87,3 +87,38 @@ Exemples :
 
 
 
+## Installation
+
+### Prérequis
+
+* PostgreSQL > 9.4
+* Python 2.7
+  * psycopg2
+
+
+### En mode stand-alone avec virtualenv
+
+```
+# get the code
+git clone https://github.com/osm-bzh/api-kerofis.git
+cd api-kerofis
+
+# set up phyton venv
+virtualenv venv
+
+# install flask and psycopg2
+pip install flask psycopg2
+
+# turn on venv
+. venv/bin/activate
+
+# tell your terminal the application to work with by exporting the FLASK_APP environment variable
+export FLASK_APP=helloflask.py
+ 
+# launch flask
+flask run
+ * Serving Flask app "helloflask"
+ * Running on http://127.0.0.1:5000/ (Press CTRL+C to quit)
+```
+
+Ouvrir un navigateur et aller sur http://127.0.0.1:5000/kerofis/
