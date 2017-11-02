@@ -28,6 +28,8 @@ CREATE INDEX idx_insee ON kerofis USING btree (insee);
 CREATE INDEX idx_stumm_didab ON kerofis USING btree (stumm_dibab);
 CREATE INDEX idx_stumm_orin ON kerofis USING btree (stumm_orin);
 
+ALTER TABLE kerofis OWNER TO kerofis;
+
 
 -- Add the postgres_fdw extension
 -- to read a CSV file on the file system

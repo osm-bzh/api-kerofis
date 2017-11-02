@@ -11,6 +11,8 @@ CREATE OR REPLACE VIEW infos_file_import AS
   GROUP BY kerofis.deiziad_restr
   ORDER BY kerofis.deiziad_restr DESC;
 
+ALTER TABLE infos_file_import OWNER TO kerofis;
+
 
 
 -- this view to list all the municipality
@@ -25,6 +27,7 @@ CREATE OR REPLACE VIEW municipality AS
   WHERE kerofis.rummad::text = 'Kumun'::text
   ORDER BY kerofis.insee;
 
+ALTER TABLE municipality OWNER TO kerofis;
 
 
 -- this view to get the number of name:br occurences per municipality
@@ -37,6 +40,8 @@ CREATE OR REPLACE VIEW stats_municipality_name_br AS
    FROM kerofis
   GROUP BY kerofis.insee
   ORDER BY kerofis.insee;
+
+ALTER TABLE stats_municipality_name_br OWNER TO kerofis;
 
 
 
@@ -52,6 +57,8 @@ CREATE OR REPLACE VIEW stats_municipality AS
     stats_municipality_name_br
   WHERE municipality.insee::text = stats_municipality_name_br.insee::text;
 
+ALTER TABLE stats_municipality OWNER TO kerofis;
+
 
 
 -- this view to get statistics on the type of place per municipality
@@ -65,6 +72,8 @@ CREATE OR REPLACE VIEW stats_municipality_type_of_place AS
   GROUP BY kerofis.insee, kerofis.rummad
   ORDER BY kerofis.insee, count(kerofis.rummad) DESC;
 
+ALTER TABLE stats_municipality_type_of_place OWNER TO kerofis;
+
 
 
 -- this view for global statistics on type of places
@@ -76,5 +85,7 @@ CREATE OR REPLACE VIEW stats_type_of_place AS
    FROM kerofis
   GROUP BY kerofis.rummad
   ORDER BY kerofis.rummad;
+
+ALTER TABLE stats_type_of_place OWNER TO kerofis;
 
 

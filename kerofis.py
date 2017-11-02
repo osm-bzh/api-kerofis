@@ -38,7 +38,7 @@ app = Flask(__name__)
 
 # general config parameters
 
-sConnPostgre = "host='localhost' dbname='osm-br' user='osmbr' password='osmbr'"
+sConnPostgre = "host='localhost' dbname='kerofis' user='kerofis' password='kerofis'"
 
 licence = "Licence Ouverte / Open Licence"
 attribution_en = "kerOfis by osm-br"
