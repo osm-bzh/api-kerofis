@@ -110,12 +110,14 @@ pip install flask psycopg2
 . venv/bin/activate
 
 # tell your terminal the application to work with by exporting the FLASK_APP environment variable
-export FLASK_APP=helloflask.py
+export FLASK_APP=kerofis.py
  
 # launch flask
 flask run
- * Serving Flask app "helloflask"
+ * Serving Flask app "kerofis"
  * Running on http://127.0.0.1:5000/ (Press CTRL+C to quit)
 ```
 
 Ouvrir un navigateur et aller sur http://127.0.0.1:5000/kerofis/
+
+
