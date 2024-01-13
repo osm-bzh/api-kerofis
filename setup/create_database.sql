@@ -44,13 +44,13 @@ CREATE SERVER kerofis_csv_import FOREIGN DATA WRAPPER file_fdw ;
 DROP FOREIGN TABLE IF EXISTS public.kerofis_csv_import ;
 CREATE FOREIGN TABLE public.kerofis_csv_import
 (
-    stagadenn text,       -- stagadenn       / préfixe (FR)
-    lec_hanv text,        -- lec_hanv        / nom (FR)
-    kumun text,           -- kumun           / nom de la commune (BR)
-    insee character varying(5),             -- insee           / code insee de la commune
-    rummad text,           -- rummad          / type de toponyme (BR)
-    dibab text,           -- stumm_dibab     / toponyme retenu (BR)
-    deiziad_degemer text,  -- deiziad_degemer / date validation ou publication  0000-00-00 ou dd/mm/yyyy
+    stagadenn text,              -- stagadenn       / préfixe (FR)
+    lec_hanv text,               -- lec_hanv        / nom (FR)
+    insee character varying(5),  -- insee           / code insee de la commune
+    kumun text,                  -- kumun           / nom de la commune (BR)
+    rummad text,                 -- rummad          / type de toponyme (BR)
+    deiziad_degemer text,        -- deiziad_degemer / date validation ou publication  0000-00-00 ou dd/mm/yyyy
+    dibab text,                  -- stumm_dibab     / toponyme retenu (BR)
     niv bigint
 )
 SERVER kerofis_csv_import
@@ -84,5 +84,6 @@ INSERT INTO public.kerofis
   FROM kerofis_csv_import
 );
 
+VACUUM ANALYZE public.kerofis ;
 
 
