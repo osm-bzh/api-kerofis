@@ -121,3 +121,22 @@ flask run
 Ouvrir un navigateur et aller sur http://127.0.0.1:5000/kerofis/
 
 
+### sous debian 8 en tant que vhost apache avec mod_wsgi
+
+```
+# get the code
+git clone https://github.com/osm-bzh/api-kerofis.git
+cd api-kerofis
+
+# check python version
+python --version
+
+# installing psycopg2
+apt-get install python-psycopg2
+
+# install required modules
+pip install -r requirements.txt 
+
+
+
+```
