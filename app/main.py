@@ -19,27 +19,39 @@ def index() -> dict:
     return {"name": "API KerOfis"}
 
 
-@router.get("/infos/")
-def infos() -> dict:
-    """General information about the data : licence, attribution and version of the data file."""
+def query_db(sql: str) -> list[sqlite3.Row]:
+    """Run a read-only query on the KerOfis database."""
     try:
         with sqlite3.connect(f"file:{DB_PATH}?mode=ro", uri=True) as conn:
-            # the view is sorted by import date, most recent first
-            row = conn.execute("SELECT deiziad_restr FROM infos_file_import LIMIT 1").fetchone()
+            conn.row_factory = sqlite3.Row
+            return conn.execute(sql).fetchall()
     except sqlite3.Error as error:
         raise HTTPException(status_code=503, detail=f"Database unavailable: {error}")
 
-    if row is None:
+
+@router.get("/infos/")
+def infos() -> dict:
+    """General information about the data : licence, attribution and version of the data file."""
+    # the view is sorted by import date, most recent first
+    rows = query_db("SELECT deiziad_restr FROM infos_file_import LIMIT 1")
+    if not rows:
         raise HTTPException(status_code=503, detail="Database is empty")
 
     return {
         "attribution_br": "KerOfis gant osm-bzh",
         "attribution_en": "KerOfis by osm-bzh",
         "attribution_fr": "KerOfis par osm-bzh",
-        "version_kerofis": row[0],
+        "version_kerofis": rows[0]["deiziad_restr"],
         "licence": "Open Database License (ODbL) v1.0",
         "name": "KerOfis data provided by Ofis publik ar brezhoneg",
     }
+
+
+@router.get("/municipalities/")
+def municipalities() -> list[dict]:
+    """List of all the municipalities : INSEE code, breton name and french name."""
+    rows = query_db("SELECT insee, name_br, name_fr FROM municipality")
+    return [dict(row) for row in rows]
 
 
 app.include_router(router)
