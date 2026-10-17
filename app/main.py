@@ -59,35 +59,77 @@ def municipalities() -> list[dict]:
     return [dict(row) for row in rows]
 
 
-@router.get("/municipality/{insee}/")
-def municipality(insee: str) -> dict:
-    """Statistics and all the toponyms of one municipality, from its INSEE code."""
+def get_municipality_infos(insee: str) -> dict | None:
+    """General information about a municipality, None if the code is not a municipality."""
+    rows = query_db(
+        "SELECT insee, name_br, name_fr, nb_toponyms FROM municipality WHERE insee = ?",
+        (insee,),
+    )
+    return dict(rows[0]) if rows else None
 
-    # list of the toponyms of the municipality
+
+def get_municipality_statistics(insee: str) -> list[dict]:
+    """Number of toponyms per type for a municipality."""
+    rows = query_db(
+        "SELECT insee, rummad, nb FROM stats_municipality_type_of_toponyms WHERE insee = ?",
+        (insee,),
+    )
+    return [dict(row) for row in rows]
+
+
+def get_municipality_toponyms(insee: str) -> list[dict]:
+    """All the toponyms of a municipality, sorted by name."""
     rows = query_db(
         "SELECT niv, deiziad_degemer, insee, kumun, stagadenn, lec_hanv, stumm_orin, rummad, stumm_dibab "
         "FROM kerofis WHERE insee = ? ORDER BY lec_hanv",
         (insee,),
     )
-    if not rows:
-        raise HTTPException(status_code=404, detail=f"No toponym for INSEE code {insee}")
+    return [dict(row) for row in rows]
 
-    # some statistics about the type of toponyms for the municipality
-    stats = query_db(
-        "SELECT insee, rummad, nb FROM stats_municipality_type_of_toponyms WHERE insee = ?",
-        (insee,),
-    )
 
-    # general information about the municipality
-    infos = query_db(
-        "SELECT insee, name_br, name_fr, nb_toponyms FROM municipality WHERE insee = ?",
-        (insee,),
-    )
+def not_found(insee: str) -> HTTPException:
+    return HTTPException(status_code=404, detail=f"No toponym for INSEE code {insee}")
+
+
+@router.get("/municipality/{insee}/")
+def municipality(insee: str) -> dict:
+    """Infos, statistics and all the toponyms of one municipality, from its INSEE code."""
+    toponyms = get_municipality_toponyms(insee)
+    if not toponyms:
+        raise not_found(insee)
+
     return {
-        "infos": dict(infos[0]) if infos else None,
-        "statistics": [dict(row) for row in stats],
-        "toponyms": [dict(row) for row in rows],
+        "infos": get_municipality_infos(insee),
+        "statistics": get_municipality_statistics(insee),
+        "toponyms": toponyms,
     }
+
+
+@router.get("/municipality/{insee}/infos/")
+def municipality_infos(insee: str) -> dict:
+    """General information about one municipality : INSEE code, names and number of toponyms."""
+    infos = get_municipality_infos(insee)
+    if infos is None:
+        raise not_found(insee)
+    return infos
+
+
+@router.get("/municipality/{insee}/statistics/")
+def municipality_statistics(insee: str) -> list[dict]:
+    """Number of toponyms per type for one municipality."""
+    statistics = get_municipality_statistics(insee)
+    if not statistics:
+        raise not_found(insee)
+    return statistics
+
+
+@router.get("/municipality/{insee}/toponyms/")
+def municipality_toponyms(insee: str) -> list[dict]:
+    """All the toponyms of one municipality."""
+    toponyms = get_municipality_toponyms(insee)
+    if not toponyms:
+        raise not_found(insee)
+    return toponyms
 
 
 app.include_router(router)

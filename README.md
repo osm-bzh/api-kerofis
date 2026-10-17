@@ -95,7 +95,7 @@ Liste des communes : code INSEE, nom breton, nom français et nombre de toponyme
 
 ### `GET /api-kerofis/municipality/{insee}/`
 
-Statistiques et toponymes d'une commune, à partir de son code INSEE. La réponse contient :
+Fiche complète d'une commune (infos, statistiques et toponymes), à partir de son code INSEE. La réponse contient :
 
 - `infos` : informations sur la commune (code INSEE, nom breton, nom français, nombre de toponymes), en premier ;
 - `statistics` : nombre de toponymes par type (`rummad`) ;
@@ -123,6 +123,44 @@ Renvoie une erreur 404 si le code ne correspond à aucun toponyme.
     }
   ]
 }
+```
+
+### `GET /api-kerofis/municipality/{insee}/infos/`
+
+Informations sur une commune : bloc `infos` de la route précédente. Renvoie une erreur 404 si le code INSEE est inconnu.
+
+```json
+{"insee": "22002", "name_br": "Andel", "name_fr": "Andel", "nb_toponyms": 1}
+```
+
+### `GET /api-kerofis/municipality/{insee}/statistics/`
+
+Nombre de toponymes par type (`rummad`) pour une commune : bloc `statistics` de la route précédente. Renvoie une erreur 404 si le code INSEE est inconnu.
+
+```json
+[
+  {"insee": "22002", "rummad": "Kumun", "nb": 1}
+]
+```
+
+### `GET /api-kerofis/municipality/{insee}/toponyms/`
+
+Tous les toponymes d'une commune, triés par `lec_hanv` : bloc `toponyms` de la route précédente. Renvoie une erreur 404 si le code INSEE est inconnu.
+
+```json
+[
+  {
+    "niv": 3679,
+    "deiziad_degemer": "1987-05-02",
+    "insee": "22002",
+    "kumun": "Andel",
+    "stagadenn": null,
+    "lec_hanv": "Andel",
+    "stumm_orin": "Andel",
+    "rummad": "Kumun",
+    "stumm_dibab": "Andel"
+  }
+]
 ```
 
 ## Licences

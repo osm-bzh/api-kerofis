@@ -32,7 +32,10 @@ Puis tester `http://localhost/api-kerofis/infos/`.
 
 - `GET /api-kerofis/` : accueil.
 - `GET /api-kerofis/infos/` : licence, attribution, `version_kerofis` (lue dans la vue `infos_file_import`).
-- `GET /api-kerofis/municipalities/` : liste de la vue `municipality` (`insee`, `name_br`, `name_fr`).
+- `GET /api-kerofis/municipalities/` : liste de la vue `municipality` (`insee`, `name_br`, `name_fr`, `nb_toponyms`).
+- `GET /api-kerofis/municipality/{insee}/` : fiche d'une commune en 3 blocs (`infos`, `statistics`, `toponyms`) ; 404 si aucun toponyme.
+- `GET /api-kerofis/municipality/{insee}/infos/`, `.../statistics/`, `.../toponyms/` : chaque bloc séparément (logique partagée dans les fonctions `get_municipality_*`).
+- `GET /api-kerofis/docs/` : Swagger (`redoc/` et `openapi.json` sous le même préfixe).
 
 ## Points à trancher
 
