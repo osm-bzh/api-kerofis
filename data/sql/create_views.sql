@@ -28,8 +28,13 @@ CREATE VIEW infos_file_import AS
 CREATE VIEW municipality AS
  SELECT kerofis.insee,
     kerofis.kumun AS name_br,
-    kerofis.stumm_orin AS name_fr
+    kerofis.stumm_orin AS name_fr,
+    nb.nb_toponyms
    FROM kerofis
+     LEFT JOIN ( SELECT kerofis.insee,
+            count(*) AS nb_toponyms
+           FROM kerofis
+          GROUP BY kerofis.insee) nb ON nb.insee = kerofis.insee
   WHERE kerofis.rummad = 'Kumun'
   ORDER BY kerofis.insee;
 

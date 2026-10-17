@@ -55,7 +55,7 @@ def infos() -> dict:
 @router.get("/municipalities/")
 def municipalities() -> list[dict]:
     """List of all the municipalities : INSEE code, breton name and french name."""
-    rows = query_db("SELECT insee, name_br, name_fr FROM municipality")
+    rows = query_db("SELECT insee, name_br, name_fr, nb_toponyms FROM municipality")
     return [dict(row) for row in rows]
 
 
