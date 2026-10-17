@@ -97,13 +97,15 @@ Liste des communes : code INSEE, nom breton, nom français et nombre de toponyme
 
 Statistiques et toponymes d'une commune, à partir de son code INSEE. La réponse contient :
 
-- `statistics` : nombre de toponymes par type (`rummad`), en premier ;
+- `infos` : informations sur la commune (code INSEE, nom breton, nom français, nombre de toponymes), en premier ;
+- `statistics` : nombre de toponymes par type (`rummad`) ;
 - `toponyms` : tous les toponymes de la commune, triés par `lec_hanv`.
 
 Renvoie une erreur 404 si le code ne correspond à aucun toponyme.
 
 ```json
 {
+  "infos": {"insee": "22002", "name_br": "Andel", "name_fr": "Andel", "nb_toponyms": 1},
   "statistics": [
     {"insee": "22002", "rummad": "Kumun", "nb": 1}
   ],

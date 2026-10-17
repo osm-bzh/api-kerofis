@@ -77,7 +77,14 @@ def municipality(insee: str) -> dict:
         "SELECT insee, rummad, nb FROM stats_municipality_type_of_toponyms WHERE insee = ?",
         (insee,),
     )
+
+    # general information about the municipality
+    infos = query_db(
+        "SELECT insee, name_br, name_fr, nb_toponyms FROM municipality WHERE insee = ?",
+        (insee,),
+    )
     return {
+        "infos": dict(infos[0]) if infos else None,
         "statistics": [dict(row) for row in stats],
         "toponyms": [dict(row) for row in rows],
     }
