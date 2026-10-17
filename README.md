@@ -95,22 +95,32 @@ Liste des communes : code INSEE, nom breton, nom français et nombre de toponyme
 
 ### `GET /api-kerofis/municipality/{insee}/`
 
-Tous les toponymes d'une commune, à partir de son code INSEE, trié par `lec_hanv`. Renvoie une erreur 404 si le code ne correspond à aucun toponyme.
+Statistiques et toponymes d'une commune, à partir de son code INSEE. La réponse contient :
+
+- `statistics` : nombre de toponymes par type (`rummad`), en premier ;
+- `toponyms` : tous les toponymes de la commune, triés par `lec_hanv`.
+
+Renvoie une erreur 404 si le code ne correspond à aucun toponyme.
 
 ```json
-[
-  {
-    "niv": 3679,
-    "deiziad_degemer": "1987-05-02",
-    "insee": "22002",
-    "kumun": "Andel",
-    "stagadenn": null,
-    "lec_hanv": "Andel",
-    "stumm_orin": "Andel",
-    "rummad": "Kumun",
-    "stumm_dibab": "Andel"
-  }
-]
+{
+  "statistics": [
+    {"insee": "22002", "rummad": "Kumun", "nb": 1}
+  ],
+  "toponyms": [
+    {
+      "niv": 3679,
+      "deiziad_degemer": "1987-05-02",
+      "insee": "22002",
+      "kumun": "Andel",
+      "stagadenn": null,
+      "lec_hanv": "Andel",
+      "stumm_orin": "Andel",
+      "rummad": "Kumun",
+      "stumm_dibab": "Andel"
+    }
+  ]
+}
 ```
 
 ## Licences

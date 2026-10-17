@@ -60,8 +60,10 @@ def municipalities() -> list[dict]:
 
 
 @router.get("/municipality/{insee}/")
-def municipality(insee: str) -> list[dict]:
-    """All the toponyms of one municipality, from its INSEE code."""
+def municipality(insee: str) -> dict:
+    """Statistics and all the toponyms of one municipality, from its INSEE code."""
+
+    # list of the toponyms of the municipality
     rows = query_db(
         "SELECT niv, deiziad_degemer, insee, kumun, stagadenn, lec_hanv, stumm_orin, rummad, stumm_dibab "
         "FROM kerofis WHERE insee = ? ORDER BY lec_hanv",
@@ -69,7 +71,16 @@ def municipality(insee: str) -> list[dict]:
     )
     if not rows:
         raise HTTPException(status_code=404, detail=f"No toponym for INSEE code {insee}")
-    return [dict(row) for row in rows]
+
+    # some statistics about the type of toponyms for the municipality
+    stats = query_db(
+        "SELECT insee, rummad, nb FROM stats_municipality_type_of_toponyms WHERE insee = ?",
+        (insee,),
+    )
+    return {
+        "statistics": [dict(row) for row in stats],
+        "toponyms": [dict(row) for row in rows],
+    }
 
 
 app.include_router(router)
