@@ -82,6 +82,37 @@ Informations générales : licence, attribution et version des données (date du
 }
 ```
 
+### `GET /api-kerofis/municipalities/`
+
+Liste des communes : code INSEE, nom breton, nom français et nombre de toponymes.
+
+```json
+[
+  {"insee": "22001", "name_br": "Alineg", "name_fr": "Allineuc", "nb_toponyms": 5},
+  {"insee": "22002", "name_br": "Andel", "name_fr": "Andel", "nb_toponyms": 1}
+]
+```
+
+### `GET /api-kerofis/municipality/{insee}/`
+
+Tous les toponymes d'une commune, à partir de son code INSEE, trié par `lec_hanv`. Renvoie une erreur 404 si le code ne correspond à aucun toponyme.
+
+```json
+[
+  {
+    "niv": 3679,
+    "deiziad_degemer": "1987-05-02",
+    "insee": "22002",
+    "kumun": "Andel",
+    "stagadenn": null,
+    "lec_hanv": "Andel",
+    "stumm_orin": "Andel",
+    "rummad": "Kumun",
+    "stumm_dibab": "Andel"
+  }
+]
+```
+
 ## Licences
 
 - **Code** : [CeCILL v2.1](LICENCE).

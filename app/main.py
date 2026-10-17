@@ -24,12 +24,12 @@ def index() -> dict:
     return {"name": "API KerOfis"}
 
 
-def query_db(sql: str) -> list[sqlite3.Row]:
+def query_db(sql: str, params: tuple = ()) -> list[sqlite3.Row]:
     """Run a read-only query on the KerOfis database."""
     try:
         with sqlite3.connect(f"file:{DB_PATH}?mode=ro", uri=True) as conn:
             conn.row_factory = sqlite3.Row
-            return conn.execute(sql).fetchall()
+            return conn.execute(sql, params).fetchall()
     except sqlite3.Error as error:
         raise HTTPException(status_code=503, detail=f"Database unavailable: {error}")
 
@@ -56,6 +56,19 @@ def infos() -> dict:
 def municipalities() -> list[dict]:
     """List of all the municipalities : INSEE code, breton name and french name."""
     rows = query_db("SELECT insee, name_br, name_fr, nb_toponyms FROM municipality")
+    return [dict(row) for row in rows]
+
+
+@router.get("/municipality/{insee}/")
+def municipality(insee: str) -> list[dict]:
+    """All the toponyms of one municipality, from its INSEE code."""
+    rows = query_db(
+        "SELECT niv, deiziad_degemer, insee, kumun, stagadenn, lec_hanv, stumm_orin, rummad, stumm_dibab "
+        "FROM kerofis WHERE insee = ? ORDER BY lec_hanv",
+        (insee,),
+    )
+    if not rows:
+        raise HTTPException(status_code=404, detail=f"No toponym for INSEE code {insee}")
     return [dict(row) for row in rows]
 
 
