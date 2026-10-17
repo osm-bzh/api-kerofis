@@ -50,27 +50,18 @@ CREATE VIEW stats_municipality_name_br AS
   ORDER BY kerofis.insee;
 
 
--- municipality : names and number of name:br occurences
+-- this view to get statistics on the type of toponyms per municipality
 
-CREATE VIEW stats_municipality AS
- SELECT municipality.insee,
-    municipality.name_br,
-    municipality.name_fr,
-    stats_municipality_name_br.nb
-   FROM municipality,
-    stats_municipality_name_br
-  WHERE municipality.insee = stats_municipality_name_br.insee;
-
-
--- this view to get statistics on the type of place per municipality
-
-CREATE VIEW stats_municipality_type_of_place AS
- SELECT kerofis.insee,
-    count(kerofis.rummad) AS nb,
-    kerofis.rummad
-   FROM kerofis
-  GROUP BY kerofis.insee, kerofis.rummad
-  ORDER BY kerofis.insee, count(kerofis.rummad) DESC;
+CREATE VIEW stats_municipality_type_of_toponyms AS
+    SELECT
+        kerofis.insee,
+        kerofis.rummad,
+      count(kerofis.rummad) AS nb
+    FROM kerofis
+    GROUP BY
+        kerofis.insee,
+        kerofis.rummad
+;
 
 
 -- this view for global statistics on type of places
