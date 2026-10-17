@@ -9,7 +9,12 @@ API_PREFIX = "/api-kerofis"
 
 DB_PATH = Path(__file__).resolve().parents[1] / "data" / "kerofis.db"
 
-app = FastAPI(title="API KerOfis")
+app = FastAPI(
+    title="API KerOfis",
+    docs_url=f"{API_PREFIX}/docs/",
+    redoc_url=f"{API_PREFIX}/redoc/",
+    openapi_url=f"{API_PREFIX}/openapi.json",
+)
 
 router = APIRouter(prefix=API_PREFIX)
 

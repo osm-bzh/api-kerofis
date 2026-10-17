@@ -50,12 +50,18 @@ Dans le fichier source, un même identifiant (`niv`) peut apparaître sur plusie
 ## Lancer l'API
 
 ```bash
-python -m uvicorn app.main:app --port 80
+python -m uvicorn app.main:app --port 8000
 ```
 
-L'API répond sous `http://localhost/api-kerofis/`. La documentation interactive générée par FastAPI est disponible sur `/docs`.
+Ajouter `--reload` pour recharger automatiquement en cas de changement du code source.
+
+L'API répond sous `http://localhost/api-kerofis/`.
 
 ## Routes
+
+### `GET /api-kerofis/docs/`
+
+Affiche la documentation de l'API (swagger).
 
 ### `GET /api-kerofis/`
 
