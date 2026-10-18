@@ -2,7 +2,9 @@
 import sqlite3
 from pathlib import Path
 
-from fastapi import APIRouter, FastAPI, HTTPException
+from typing import Annotated, Literal
+
+from fastapi import APIRouter, FastAPI, HTTPException, Query
 
 # the API is served under http://localhost/api-kerofis/
 API_PREFIX = "/api-kerofis"
@@ -130,6 +132,55 @@ def municipality_toponyms(insee: str) -> list[dict]:
     if not toponyms:
         raise not_found(insee)
     return toponyms
+
+
+def like_pattern(text: str, prefix_only: bool = False) -> str:
+    """LIKE pattern matching a text, with the LIKE wildcards of the text escaped (ESCAPE '\\')."""
+    escaped = text.replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_")
+    return f"{escaped}%" if prefix_only else f"%{escaped}%"
+
+
+# search criteria must have at least 2 characters
+SearchText = Annotated[str | None, Query(min_length=2)]
+
+
+@router.get("/search/municipalities/")
+def search_municipalities(
+    insee: SearchText = None,
+    name_br: SearchText = None,
+    name_fr: SearchText = None,
+    sort: Literal["insee", "name_br", "name_fr"] = "name_br",
+) -> list[dict]:
+    """Search municipalities. At least one criterion is required, several are combined (AND).
+
+    - insee : the INSEE code starts with the value (`29` : the whole department)
+    - name_br : the breton name contains the value
+    - name_fr : the french name contains the value
+    - sort : the sort criterion : insee, name_br or name_fr (default : name_br)
+    """
+    conditions = []
+    params = []
+    if insee is not None:
+        conditions.append("insee LIKE ? ESCAPE '\\'")
+        params.append(like_pattern(insee, prefix_only=True))
+    if name_br is not None:
+        conditions.append("name_br LIKE ? ESCAPE '\\'")
+        params.append(like_pattern(name_br))
+    if name_fr is not None:
+        conditions.append("name_fr LIKE ? ESCAPE '\\'")
+        params.append(like_pattern(name_fr))
+    if not conditions:
+        raise HTTPException(
+            status_code=422, detail="At least one search criterion is required : insee, name_br or name_fr"
+        )
+
+    rows = query_db(
+        "SELECT insee, name_br, name_fr, nb_toponyms FROM municipality WHERE "
+        + " AND ".join(conditions)
+        + f" ORDER BY {sort} COLLATE NOCASE, insee",
+        tuple(params),
+    )
+    return [dict(row) for row in rows]
 
 
 app.include_router(router)
