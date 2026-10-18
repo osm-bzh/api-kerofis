@@ -150,13 +150,15 @@ def search_municipalities(
     name_br: SearchText = None,
     name_fr: SearchText = None,
     sort: Literal["insee", "name_br", "name_fr"] = "name_br",
-) -> list[dict]:
+) -> dict:
     """Search municipalities. At least one criterion is required, several are combined (AND).
 
     - insee : the INSEE code starts with the value (`29` : the whole department)
     - name_br : the breton name contains the value
     - name_fr : the french name contains the value
     - sort : the sort criterion : insee, name_br or name_fr (default : name_br)
+
+    The response gives the number of municipalities found, then the list of the municipalities.
     """
     conditions = []
     params = []
@@ -180,7 +182,8 @@ def search_municipalities(
         + f" ORDER BY {sort} COLLATE NOCASE, insee",
         tuple(params),
     )
-    return [dict(row) for row in rows]
+    municipalities = [dict(row) for row in rows]
+    return {"count": len(municipalities), "municipalities": municipalities}
 
 
 app.include_router(router)

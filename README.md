@@ -257,18 +257,23 @@ Recherche de communes. Au moins un critère est obligatoire. Plusieurs critères
 | `name_fr` | le nom français contient la valeur | `name_fr=carhaix` |
 | `sort` | critère de tri : `insee`, `name_br` ou `name_fr` (défaut : `name_br`) | `sort=name_fr` |
 
-Chaque critère de recherche doit avoir au moins 2 caractères (sinon erreur 422). Un critère manquant donne aussi une erreur 422. Si rien n'est trouvé, la réponse est `200` avec une liste vide `[]`.
+Chaque critère de recherche doit avoir au moins 2 caractères (sinon erreur 422). Un critère manquant donne aussi une erreur 422. Si rien n'est trouvé, la réponse est `200` avec `count` à 0 et une liste vide.
 
 Exemples :
 
 - les communes dont le nom breton contient `plouha` : `/api-kerofis/search/municipalities/?name_br=plouha`
 - les communes du Finistère dont le nom français contient `plou`, triées par nom français : `/api-kerofis/search/municipalities/?insee=29&name_fr=plou&sort=name_fr`
 
+La réponse contient `count` (nombre de communes trouvées) en premier, puis `municipalities` (la liste des communes) :
+
 ```json
-[
-  {"insee": "22222", "name_br": "Plouha", "name_fr": "Plouha", "nb_toponyms": 42},
-  {"insee": "56168", "name_br": "Plouharnel", "name_fr": "Plouharnel", "nb_toponyms": 31}
-]
+{
+  "count": 2,
+  "municipalities": [
+    {"insee": "22222", "name_br": "Plouha", "name_fr": "Plouha", "nb_toponyms": 42},
+    {"insee": "56168", "name_br": "Plouharnel", "name_fr": "Plouharnel", "nb_toponyms": 31}
+  ]
+}
 ```
 
 La casse n'est ignorée que pour les caractères ASCII : `plouger` ne trouve pas `Plougêr`.
