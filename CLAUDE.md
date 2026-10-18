@@ -28,6 +28,8 @@ python -m uvicorn app.main:app --port 80
 
 Puis tester `http://localhost/api-kerofis/infos/`.
 
+Pour voir les requêtes SQL dans la console : `python -m app.main --debug-sql` (options `--port`, `--reload`), ou `KEROFIS_DEBUG_SQL=1` avec uvicorn directement. La sortie vient de `query_db()`.
+
 ## Routes existantes
 
 - `GET /api-kerofis/` : accueil.

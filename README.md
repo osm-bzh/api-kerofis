@@ -55,6 +55,28 @@ python -m uvicorn app.main:app --port 8000
 
 Ajouter `--reload` pour recharger automatiquement en cas de changement du code source.
 
+### Afficher les requêtes SQL (mode debug)
+
+Pour afficher dans la console chaque requête SQL envoyée à la base, lancer l'API avec le lanceur intégré :
+
+```bash
+python -m app.main --debug-sql
+```
+
+Ce lanceur accepte aussi `--port` (80 par défaut) et `--reload`. Exemple : `python -m app.main --debug-sql --port 8000 --reload`.
+
+Chaque requête est affichée sur une ligne `[SQL]`, avec ses paramètres déjà remplacés :
+
+```
+[SQL] SELECT insee, name_br, name_fr, nb_toponyms FROM municipality WHERE insee = '29024'
+```
+
+`uvicorn` refuse les options qu'il ne connaît pas : avec la commande `uvicorn` directe, activer le mode avec la variable d'environnement `KEROFIS_DEBUG_SQL=1`.
+
+```bash
+KEROFIS_DEBUG_SQL=1 python -m uvicorn app.main:app --port 8000
+```
+
 L'API répond sous `http://localhost/api-kerofis/`.
 
 ## Routes

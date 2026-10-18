@@ -1,5 +1,8 @@
 """KerOfis API : FastAPI application."""
+import argparse
+import os
 import sqlite3
+import sys
 import unicodedata
 from pathlib import Path
 from typing import Annotated, Literal
@@ -10,6 +13,10 @@ from fastapi import APIRouter, FastAPI, HTTPException, Query
 API_PREFIX = "/api-kerofis"
 
 DB_PATH = Path(__file__).resolve().parents[1] / "data" / "kerofis.db"
+
+# print the SQL queries sent to the database : python -m app.main --debug-sql
+# (or KEROFIS_DEBUG_SQL=1 when the application is started directly with uvicorn)
+DEBUG_SQL_ENV = "KEROFIS_DEBUG_SQL"
 
 app = FastAPI(
     title="API KerOfis by OSM-Bzh",
@@ -40,6 +47,9 @@ def query_db(sql: str, params: tuple = ()) -> list[sqlite3.Row]:
         with sqlite3.connect(f"file:{DB_PATH}?mode=ro", uri=True) as conn:
             conn.row_factory = sqlite3.Row
             conn.create_function("normalize", 1, normalize, deterministic=True)
+            if os.environ.get(DEBUG_SQL_ENV) == "1":
+                # the callback gets the statement with its parameters already replaced
+                conn.set_trace_callback(lambda statement: print(f"[SQL] {statement}", file=sys.stderr, flush=True))
             return conn.execute(sql, params).fetchall()
     except sqlite3.Error as error:
         raise HTTPException(status_code=503, detail=f"Database unavailable: {error}")
@@ -249,3 +259,18 @@ def search_toponyms(
 
 
 app.include_router(router)
+
+
+if __name__ == "__main__":
+    import uvicorn
+
+    parser = argparse.ArgumentParser(description="Start the KerOfis API.")
+    parser.add_argument("--port", type=int, default=8000)
+    parser.add_argument("--reload", action="store_true", help="restart the server when the code changes")
+    parser.add_argument("--debug-sql", action="store_true", help="print the SQL queries in the console")
+    args = parser.parse_args()
+
+    if args.debug_sql:
+        # an environment variable is inherited by the process restarted by --reload
+        os.environ[DEBUG_SQL_ENV] = "1"
+    uvicorn.run("app.main:app", port=args.port, reload=args.reload)
