@@ -39,3 +39,14 @@ CREATE INDEX idx_toponyms_name_br ON toponyms (name_br);
 CREATE INDEX idx_toponyms_type_fr ON toponyms (type_fr);
 CREATE INDEX idx_toponyms_name_fr ON toponyms (name_fr);
 
+
+-- toponyms types
+DROP TABLE IF EXISTS toponyms_types;
+CREATE TABLE toponyms_types (
+    type_br        TEXT NOT NULL,
+    type_fr        TEXT NOT NULL
+);
+
+CREATE INDEX idx_toponyms_types_type_br ON toponyms (type_br);
+CREATE INDEX idx_toponyms_types_type_fr ON toponyms (type_fr);
+

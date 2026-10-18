@@ -48,8 +48,8 @@ Le script :
 ### Les tables
 
 - `kerofis` : les données du CSV, une ligne par toponyme.
-- `toponyms` : table dérivée de `kerofis` (identifiant, code INSEE, type et nom en breton, type et nom en français), remplie par `data/sql/load_tables.sql`.
-`load_tables.sql` peut contenir plusieurs requêtes : elles sont toutes exécutées, dans l'ordre du fichier, après le chargement de `kerofis` et avant la création des vues. Une vue peut donc s'appuyer sur ces tables.
+- `toponyms_types` : table qui contient les types de toponymes en breton et en français ; remplie par `data/sql/load_tables.sql`.
+- `toponyms` : table dérivée de `kerofis` ; remplie par `data/sql/load_tables.sql`.
 
 La date du fichier est enregistrée dans la colonne `deiziad_restr` : elle sert de numéro de version des données.
 
