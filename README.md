@@ -278,6 +278,64 @@ La réponse contient `count` (nombre de communes trouvées) en premier, puis `mu
 
 La casse n'est ignorée que pour les caractères ASCII : `plouger` ne trouve pas `Plougêr`.
 
+### `GET /api-kerofis/search/toponyms/`
+
+Recherche de toponymes. Au moins un critère est obligatoire. Plusieurs critères se combinent (ET).
+
+| Paramètre | Recherche | Exemple |
+|---|---|---|
+| `insee` | le code INSEE commence par la valeur (`29` : tout le département) | `insee=29024` |
+| `name_br` | le nom breton (`stumm_dibab`) contient la valeur | `name_br=iliz` |
+| `name_fr` | le nom français (`stumm_orin`) contient la valeur | `name_fr=abattoir` |
+| `type` | le type (`rummad`) est égal à la valeur, en minuscules et sans accents | `type=keriadenn` |
+| `sort` | critère de tri : `insee`, `name_br` ou `name_fr` (défaut : `name_br`) | `sort=name_fr` |
+| `limit` | nombre maximum de toponymes renvoyés : de 1 à 1000 (défaut : 100) | `limit=20` |
+| `offset` | rang du premier toponyme renvoyé, pour la pagination (défaut : 0) | `offset=20` |
+
+Chaque critère texte (`insee`, `name_br`, `name_fr`, `type`) doit avoir au moins 2 caractères (sinon erreur 422). Un critère manquant donne aussi une erreur 422. Si rien n'est trouvé, la réponse est `200` avec `count` à 0 et une liste vide.
+
+Le type est comparé sans tenir compte des accents ni de la casse : `keriadenn` et `Kêriadenn` donnent le même résultat. Exemples de types : `hent` (voies), `keriadenn` (lieux-dits), `monumant/savadur`, `dour`, `karter`.
+
+Exemples :
+
+- les lieux-dits de Carhaix-Plouguer : `/api-kerofis/search/toponyms/?insee=29024&type=keriadenn`
+- les toponymes dont le nom français contient `abattoir` : `/api-kerofis/search/toponyms/?name_fr=abattoir`
+- la deuxième page de 20 toponymes dont le nom breton contient `iliz` : `/api-kerofis/search/toponyms/?name_br=iliz&limit=20&offset=20`
+
+La réponse contient `count` en premier, puis `toponyms`. `count` est le nombre total de toponymes trouvés, quelle que soit la pagination : la liste `toponyms` peut en contenir moins (`limit`).
+
+```json
+{
+  "count": 80,
+  "toponyms": [
+    {
+      "niv": 76994,
+      "deiziad_degemer": "2013-06-18",
+      "insee": "29024",
+      "kumun": "Karaez-Plougêr",
+      "stagadenn": "Aux",
+      "lec_hanv": "Dépendances de Persivien",
+      "stumm_orin": "Aux Dépendances de Persivien",
+      "rummad": "Kêriadenn",
+      "stumm_dibab": "Somachoù Persivien"
+    },
+    {
+      "niv": 30871,
+      "deiziad_degemer": "2011-06-27",
+      "insee": "29024",
+      "kumun": "Karaez-Plougêr",
+      "stagadenn": null,
+      "lec_hanv": "Caborgnès",
+      "stumm_orin": "Caborgnès",
+      "rummad": "Kêriadenn",
+      "stumm_dibab": "Kaborgnez"
+    }
+  ]
+}
+```
+
+Cet exemple correspond à `?insee=29024&type=keriadenn&sort=name_fr&limit=2` (liste abrégée à 2 toponymes). Comme pour les communes, la casse n'est ignorée que pour les caractères ASCII dans `name_br` et `name_fr`.
+
 ## Licences
 
 - **Code** : [CeCILL v2.1](LICENCE).

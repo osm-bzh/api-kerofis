@@ -36,6 +36,7 @@ Puis tester `http://localhost/api-kerofis/infos/`.
 - `GET /api-kerofis/municipality/{insee}/` : fiche d'une commune en 3 blocs (`infos`, `statistics`, `toponyms`) ; 404 si aucun toponyme.
 - `GET /api-kerofis/municipality/{insee}/infos/`, `.../statistics/`, `.../toponyms/` : chaque bloc séparément (logique partagée dans les fonctions `get_municipality_*`).
 - `GET /api-kerofis/search/municipalities/` : recherche de communes (`insee` par préfixe, `name_br` et `name_fr` par « contient », 2 caractères minimum, `sort`) ; réponse `{count, municipalities}`, 200 avec `count` à 0 si rien.
+- `GET /api-kerofis/search/toponyms/` : recherche de toponymes (`insee` par préfixe, `name_br`/`name_fr` par « contient » sur `stumm_dibab`/`stumm_orin`, `type` exact en minuscules sans accents sur `rummad` via la fonction SQL `normalize()`, `sort`, pagination `limit` 100 par défaut / 1000 max et `offset`) ; réponse `{count, toponyms}` avec `count` = total hors pagination.
 - `GET /api-kerofis/docs/` : Swagger (`redoc/` et `openapi.json` sous le même préfixe).
 
 ## Points à trancher

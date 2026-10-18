@@ -1,7 +1,7 @@
 """KerOfis API : FastAPI application."""
 import sqlite3
+import unicodedata
 from pathlib import Path
-
 from typing import Annotated, Literal
 
 from fastapi import APIRouter, FastAPI, HTTPException, Query
@@ -23,14 +23,23 @@ router = APIRouter(prefix=API_PREFIX)
 
 @router.get("/")
 def index() -> dict:
-    return {"name": "API KerOfis"}
+    return {"name": "API KerOfis by OSM-Bzh"}
+
+
+def normalize(text: str | None) -> str | None:
+    """Lower case and remove the accents of a text : `Kêriadenn` -> `keriadenn`."""
+    if text is None:
+        return None
+    decomposed = unicodedata.normalize("NFD", text)
+    return "".join(c for c in decomposed if not unicodedata.combining(c)).lower()
 
 
 def query_db(sql: str, params: tuple = ()) -> list[sqlite3.Row]:
-    """Run a read-only query on the KerOfis database."""
+    """Run a read-only query on the KerOfis database. The SQL function normalize() is available."""
     try:
         with sqlite3.connect(f"file:{DB_PATH}?mode=ro", uri=True) as conn:
             conn.row_factory = sqlite3.Row
+            conn.create_function("normalize", 1, normalize, deterministic=True)
             return conn.execute(sql, params).fetchall()
     except sqlite3.Error as error:
         raise HTTPException(status_code=503, detail=f"Database unavailable: {error}")
@@ -144,6 +153,15 @@ def like_pattern(text: str, prefix_only: bool = False) -> str:
 SearchText = Annotated[str | None, Query(min_length=2)]
 
 
+def add_like_condition(
+    conditions: list[str], params: list, column: str, value: str | None, prefix_only: bool = False
+) -> None:
+    """Add a LIKE condition on a column to a search, if the criterion is given."""
+    if value is not None:
+        conditions.append(f"{column} LIKE ? ESCAPE '\\'")
+        params.append(like_pattern(value, prefix_only))
+
+
 @router.get("/search/municipalities/")
 def search_municipalities(
     insee: SearchText = None,
@@ -162,15 +180,9 @@ def search_municipalities(
     """
     conditions = []
     params = []
-    if insee is not None:
-        conditions.append("insee LIKE ? ESCAPE '\\'")
-        params.append(like_pattern(insee, prefix_only=True))
-    if name_br is not None:
-        conditions.append("name_br LIKE ? ESCAPE '\\'")
-        params.append(like_pattern(name_br))
-    if name_fr is not None:
-        conditions.append("name_fr LIKE ? ESCAPE '\\'")
-        params.append(like_pattern(name_fr))
+    add_like_condition(conditions, params, "insee", insee, prefix_only=True)
+    add_like_condition(conditions, params, "name_br", name_br)
+    add_like_condition(conditions, params, "name_fr", name_fr)
     if not conditions:
         raise HTTPException(
             status_code=422, detail="At least one search criterion is required : insee, name_br or name_fr"
@@ -184,6 +196,56 @@ def search_municipalities(
     )
     municipalities = [dict(row) for row in rows]
     return {"count": len(municipalities), "municipalities": municipalities}
+
+
+# columns of the kerofis table used to sort the toponyms
+TOPONYM_SORT_COLUMNS = {"insee": "insee", "name_br": "stumm_dibab", "name_fr": "stumm_orin"}
+
+
+@router.get("/search/toponyms/")
+def search_toponyms(
+    insee: SearchText = None,
+    name_br: SearchText = None,
+    name_fr: SearchText = None,
+    type: SearchText = None,
+    sort: Literal["insee", "name_br", "name_fr"] = "name_br",
+    limit: Annotated[int, Query(ge=1, le=1000)] = 100,
+    offset: Annotated[int, Query(ge=0)] = 0,
+) -> dict:
+    """Search toponyms. At least one criterion is required, several are combined (AND).
+
+    - insee : the INSEE code starts with the value (`29` : the whole department)
+    - name_br : the breton name contains the value
+    - name_fr : the french name contains the value
+    - type : the type of toponym is the value, in lower case without accents (`keriadenn`)
+    - sort : the sort criterion : insee, name_br or name_fr (default : name_br)
+    - limit, offset : pagination (default : 100 toponyms from the first one, 1000 at most)
+
+    The response gives the total number of toponyms found (whatever the pagination),
+    then the list of the toponyms of the requested page.
+    """
+    conditions = []
+    params = []
+    add_like_condition(conditions, params, "insee", insee, prefix_only=True)
+    add_like_condition(conditions, params, "stumm_dibab", name_br)
+    add_like_condition(conditions, params, "stumm_orin", name_fr)
+    if type is not None:
+        conditions.append("normalize(rummad) = ?")
+        params.append(normalize(type))
+    if not conditions:
+        raise HTTPException(
+            status_code=422, detail="At least one search criterion is required : insee, name_br, name_fr or type"
+        )
+
+    where = " AND ".join(conditions)
+    count = query_db(f"SELECT count(*) FROM kerofis WHERE {where}", tuple(params))[0][0]
+    rows = query_db(
+        "SELECT niv, deiziad_degemer, insee, kumun, stagadenn, lec_hanv, stumm_orin, rummad, stumm_dibab "
+        f"FROM kerofis WHERE {where} "
+        f"ORDER BY {TOPONYM_SORT_COLUMNS[sort]} COLLATE NOCASE, niv LIMIT ? OFFSET ?",
+        (*params, limit, offset),
+    )
+    return {"count": count, "toponyms": [dict(row) for row in rows]}
 
 
 app.include_router(router)
