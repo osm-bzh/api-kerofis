@@ -49,7 +49,7 @@ Le script :
 
 - `kerofis` : les données du CSV, une ligne par toponyme.
 - `toponyms_types` : table qui contient les types de toponymes en breton et en français ; remplie par `data/sql/load_tables.sql`.
-- `toponyms` : table dérivée de `kerofis` ; remplie par `data/sql/load_tables.sql`.
+- `toponyms` : table dérivée de `kerofis` (colonnes `id`, `insee`, `type_br`, `name_br`, `type_fr`, `name_fr`), remplie par `data/sql/load_tables.sql`. C'est la table lue par l'API pour les toponymes.
 
 La date du fichier est enregistrée dans la colonne `deiziad_restr` : elle sert de numéro de version des données.
 
@@ -129,7 +129,7 @@ Fiche complète d'une commune (infos, statistiques et toponymes), à partir de s
 
 - `infos` : informations sur la commune (code INSEE, nom breton, nom français, nombre de toponymes), en premier ;
 - `statistics` : nombre de toponymes par type (`rummad`) ;
-- `toponyms` : tous les toponymes de la commune, triés par `lec_hanv`.
+- `toponyms` : tous les toponymes de la commune, triés par `name_fr`.
 
 Renvoie une erreur 404 si le code ne correspond à aucun toponyme.
 
@@ -190,26 +190,20 @@ Renvoie une erreur 404 si le code ne correspond à aucun toponyme.
   ],
   "toponyms": [
     {
-      "niv": 46627,
-      "deiziad_degemer": "2007-01-01",
+      "id": 363,
       "insee": "29024",
-      "kumun": "Karaez-Plougêr",
-      "stagadenn": "Place du",
-      "lec_hanv": "19-mars-62",
-      "stumm_orin": "Place du 19-mars-62",
-      "rummad": "Hent",
-      "stumm_dibab": "Plasenn an 19 a viz Meurzh 1962"
+      "type_br": "Kêriadenn",
+      "name_br": "Al Limit",
+      "type_fr": "Village",
+      "name_fr": "La Limite"
     },
     {
-      "niv": 46440,
-      "deiziad_degemer": "2007-01-01",
+      "id": 46721,
       "insee": "29024",
-      "kumun": "Karaez-Plougêr",
-      "stagadenn": "Rue de l'",
-      "lec_hanv": "Abattoir",
-      "stumm_orin": "Rue de l'Abattoir",
-      "rummad": "Hent",
-      "stumm_dibab": "Straed an Ti-lazhañ"
+      "type_br": "Hent",
+      "name_br": "Alez ar Pennduig",
+      "type_fr": "Chemin",
+      "name_fr": "Allée du Pennduick"
     }
   ]
 }
@@ -245,31 +239,25 @@ Nombre de toponymes par type (`rummad`) pour une commune : bloc `statistics` de 
 
 ### `GET /api-kerofis/municipality/{insee}/toponyms/`
 
-Tous les toponymes d'une commune, triés par `lec_hanv` : bloc `toponyms` de la route précédente. Renvoie une erreur 404 si le code INSEE est inconnu.
+Tous les toponymes d'une commune, triés par `name_fr` : bloc `toponyms` de la route précédente. Renvoie une erreur 404 si le code INSEE est inconnu.
 
 ```json
 [
   {
-    "niv": 46627,
-    "deiziad_degemer": "2007-01-01",
+    "id": 363,
     "insee": "29024",
-    "kumun": "Karaez-Plougêr",
-    "stagadenn": "Place du",
-    "lec_hanv": "19-mars-62",
-    "stumm_orin": "Place du 19-mars-62",
-    "rummad": "Hent",
-    "stumm_dibab": "Plasenn an 19 a viz Meurzh 1962"
+    "type_br": "Kêriadenn",
+    "name_br": "Al Limit",
+    "type_fr": "Village",
+    "name_fr": "La Limite"
   },
   {
-    "niv": 46440,
-    "deiziad_degemer": "2007-01-01",
+    "id": 46721,
     "insee": "29024",
-    "kumun": "Karaez-Plougêr",
-    "stagadenn": "Rue de l'",
-    "lec_hanv": "Abattoir",
-    "stumm_orin": "Rue de l'Abattoir",
-    "rummad": "Hent",
-    "stumm_dibab": "Straed an Ti-lazhañ"
+    "type_br": "Hent",
+    "name_br": "Alez ar Pennduig",
+    "type_fr": "Chemin",
+    "name_fr": "Allée du Pennduick"
   }
 ]
 ```
@@ -315,9 +303,9 @@ Recherche de toponymes. Au moins un critère est obligatoire. Plusieurs critère
 | Paramètre | Recherche | Exemple |
 |---|---|---|
 | `insee` | le code INSEE commence par la valeur (`29` : tout le département) | `insee=29024` |
-| `name_br` | le nom breton (`stumm_dibab`) contient la valeur | `name_br=iliz` |
-| `name_fr` | le nom français (`stumm_orin`) contient la valeur | `name_fr=abattoir` |
-| `type` | le type (`rummad`) est égal à la valeur, en minuscules et sans accents | `type=keriadenn` |
+| `name_br` | le nom breton contient la valeur | `name_br=iliz` |
+| `name_fr` | le nom français contient la valeur | `name_fr=abattoir` |
+| `type` | le type breton (`type_br`) est égal à la valeur, en minuscules et sans accents | `type=keriadenn` |
 | `sort` | critère de tri : `insee`, `name_br` ou `name_fr` (défaut : `name_br`) | `sort=name_fr` |
 | `limit` | nombre maximum de toponymes renvoyés : de 1 à 1000 (défaut : 100) | `limit=20` |
 | `offset` | rang du premier toponyme renvoyé, pour la pagination (défaut : 0) | `offset=20` |
@@ -339,26 +327,20 @@ La réponse contient `count` en premier, puis `toponyms`. `count` est le nombre 
   "count": 80,
   "toponyms": [
     {
-      "niv": 76994,
-      "deiziad_degemer": "2013-06-18",
+      "id": 76994,
       "insee": "29024",
-      "kumun": "Karaez-Plougêr",
-      "stagadenn": "Aux",
-      "lec_hanv": "Dépendances de Persivien",
-      "stumm_orin": "Aux Dépendances de Persivien",
-      "rummad": "Kêriadenn",
-      "stumm_dibab": "Somachoù Persivien"
+      "type_br": "Kêriadenn",
+      "name_br": "Somachoù Persivien",
+      "type_fr": "Village",
+      "name_fr": "Aux Dépendances de Persivien"
     },
     {
-      "niv": 30871,
-      "deiziad_degemer": "2011-06-27",
+      "id": 30871,
       "insee": "29024",
-      "kumun": "Karaez-Plougêr",
-      "stagadenn": null,
-      "lec_hanv": "Caborgnès",
-      "stumm_orin": "Caborgnès",
-      "rummad": "Kêriadenn",
-      "stumm_dibab": "Kaborgnez"
+      "type_br": "Kêriadenn",
+      "name_br": "Kaborgnez",
+      "type_fr": "Village",
+      "name_fr": "Caborgnès"
     }
   ]
 }

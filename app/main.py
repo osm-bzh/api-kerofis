@@ -101,8 +101,8 @@ def get_municipality_statistics(insee: str) -> list[dict]:
 def get_municipality_toponyms(insee: str) -> list[dict]:
     """All the toponyms of a municipality, sorted by name."""
     rows = query_db(
-        "SELECT niv, deiziad_degemer, insee, kumun, stagadenn, lec_hanv, stumm_orin, rummad, stumm_dibab "
-        "FROM kerofis WHERE insee = ? ORDER BY lec_hanv",
+        "SELECT id, insee, type_br, name_br, type_fr, name_fr "
+        "FROM toponyms WHERE insee = ? ORDER BY name_br COLLATE NOCASE, id",
         (insee,),
     )
     return [dict(row) for row in rows]
@@ -208,10 +208,6 @@ def search_municipalities(
     return {"count": len(municipalities), "municipalities": municipalities}
 
 
-# columns of the kerofis table used to sort the toponyms
-TOPONYM_SORT_COLUMNS = {"insee": "insee", "name_br": "stumm_dibab", "name_fr": "stumm_orin"}
-
-
 @router.get("/search/toponyms/")
 def search_toponyms(
     insee: SearchText = None,
@@ -227,7 +223,7 @@ def search_toponyms(
     - insee : the INSEE code starts with the value (`29` : the whole department)
     - name_br : the breton name contains the value
     - name_fr : the french name contains the value
-    - type : the type of toponym is the value, in lower case without accents (`keriadenn`)
+    - type : the breton type of toponym is the value, in lower case without accents (`keriadenn`)
     - sort : the sort criterion : insee, name_br or name_fr (default : name_br)
     - limit, offset : pagination (default : 100 toponyms from the first one, 1000 at most)
 
@@ -237,10 +233,10 @@ def search_toponyms(
     conditions = []
     params = []
     add_like_condition(conditions, params, "insee", insee, prefix_only=True)
-    add_like_condition(conditions, params, "stumm_dibab", name_br)
-    add_like_condition(conditions, params, "stumm_orin", name_fr)
+    add_like_condition(conditions, params, "name_br", name_br)
+    add_like_condition(conditions, params, "name_fr", name_fr)
     if type is not None:
-        conditions.append("normalize(rummad) = ?")
+        conditions.append("normalize(type_br) = ?")
         params.append(normalize(type))
     if not conditions:
         raise HTTPException(
@@ -248,11 +244,11 @@ def search_toponyms(
         )
 
     where = " AND ".join(conditions)
-    count = query_db(f"SELECT count(*) FROM kerofis WHERE {where}", tuple(params))[0][0]
+    count = query_db(f"SELECT count(*) FROM toponyms WHERE {where}", tuple(params))[0][0]
     rows = query_db(
-        "SELECT niv, deiziad_degemer, insee, kumun, stagadenn, lec_hanv, stumm_orin, rummad, stumm_dibab "
-        f"FROM kerofis WHERE {where} "
-        f"ORDER BY {TOPONYM_SORT_COLUMNS[sort]} COLLATE NOCASE, niv LIMIT ? OFFSET ?",
+        "SELECT id, insee, type_br, name_br, type_fr, name_fr "
+        f"FROM toponyms WHERE {where} "
+        f"ORDER BY {sort} COLLATE NOCASE, id LIMIT ? OFFSET ?",
         (*params, limit, offset),
     )
     return {"count": count, "toponyms": [dict(row) for row in rows]}
@@ -265,7 +261,7 @@ if __name__ == "__main__":
     import uvicorn
 
     parser = argparse.ArgumentParser(description="Start the KerOfis API.")
-    parser.add_argument("--port", type=int, default=8000)
+    parser.add_argument("--port", type=int, default=80)
     parser.add_argument("--reload", action="store_true", help="restart the server when the code changes")
     parser.add_argument("--debug-sql", action="store_true", help="print the SQL queries in the console")
     args = parser.parse_args()
