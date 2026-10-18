@@ -88,8 +88,8 @@ Liste des communes : code INSEE, nom breton, nom français et nombre de toponyme
 
 ```json
 [
-  {"insee": "22001", "name_br": "Alineg", "name_fr": "Allineuc", "nb_toponyms": 5},
-  {"insee": "22002", "name_br": "Andel", "name_fr": "Andel", "nb_toponyms": 1}
+  {"insee": "29023", "name_br": "Karanteg", "name_fr": "Carantec", "nb_toponyms": 30},
+  {"insee": "29024", "name_br": "Karaez-Plougêr", "name_fr": "Carhaix-Plouguer", "nb_toponyms": 498}
 ]
 ```
 
@@ -105,32 +105,94 @@ Renvoie une erreur 404 si le code ne correspond à aucun toponyme.
 
 ```json
 {
-  "infos": {"insee": "22002", "name_br": "Andel", "name_fr": "Andel", "nb_toponyms": 1},
+  "infos": {
+    "insee": "29024",
+    "name_br": "Karaez-Plougêr",
+    "name_fr": "Carhaix-Plouguer",
+    "nb_toponyms": 498
+  },
   "statistics": [
-    {"insee": "22002", "rummad": "Kumun", "nb": 1}
+    {
+      "insee": "29024",
+      "rummad": "Diseurt",
+      "nb": 4
+    },
+    {
+      "insee": "29024",
+      "rummad": "Hent",
+      "nb": 314
+    },
+    {
+      "insee": "29024",
+      "rummad": "Karter",
+      "nb": 6
+    },
+    {
+      "insee": "29024",
+      "rummad": "Koad",
+      "nb": 1
+    },
+    {
+      "insee": "29024",
+      "rummad": "Kumun",
+      "nb": 1
+    },
+    {
+      "insee": "29024",
+      "rummad": "Kêriadenn",
+      "nb": 80
+    },
+    {
+      "insee": "29024",
+      "rummad": "Maez",
+      "nb": 11
+    },
+    {
+      "insee": "29024",
+      "rummad": "Monumant/Savadur",
+      "nb": 63
+    },
+    {
+      "insee": "29024",
+      "rummad": "Takad",
+      "nb": 18
+    }
   ],
   "toponyms": [
     {
-      "niv": 3679,
-      "deiziad_degemer": "1987-05-02",
-      "insee": "22002",
-      "kumun": "Andel",
-      "stagadenn": null,
-      "lec_hanv": "Andel",
-      "stumm_orin": "Andel",
-      "rummad": "Kumun",
-      "stumm_dibab": "Andel"
+      "niv": 46627,
+      "deiziad_degemer": "2007-01-01",
+      "insee": "29024",
+      "kumun": "Karaez-Plougêr",
+      "stagadenn": "Place du",
+      "lec_hanv": "19-mars-62",
+      "stumm_orin": "Place du 19-mars-62",
+      "rummad": "Hent",
+      "stumm_dibab": "Plasenn an 19 a viz Meurzh 1962"
+    },
+    {
+      "niv": 46440,
+      "deiziad_degemer": "2007-01-01",
+      "insee": "29024",
+      "kumun": "Karaez-Plougêr",
+      "stagadenn": "Rue de l'",
+      "lec_hanv": "Abattoir",
+      "stumm_orin": "Rue de l'Abattoir",
+      "rummad": "Hent",
+      "stumm_dibab": "Straed an Ti-lazhañ"
     }
   ]
 }
 ```
+
+La liste est abrégée dans cet exemple : la commune compte 498 toponymes.
 
 ### `GET /api-kerofis/municipality/{insee}/infos/`
 
 Informations sur une commune : bloc `infos` de la route précédente. Renvoie une erreur 404 si le code INSEE est inconnu.
 
 ```json
-{"insee": "22002", "name_br": "Andel", "name_fr": "Andel", "nb_toponyms": 1}
+{"insee": "29024", "name_br": "Karaez-Plougêr", "name_fr": "Carhaix-Plouguer", "nb_toponyms": 498}
 ```
 
 ### `GET /api-kerofis/municipality/{insee}/statistics/`
@@ -139,7 +201,15 @@ Nombre de toponymes par type (`rummad`) pour une commune : bloc `statistics` de 
 
 ```json
 [
-  {"insee": "22002", "rummad": "Kumun", "nb": 1}
+  {"insee": "29024", "rummad": "Diseurt", "nb": 4},
+  {"insee": "29024", "rummad": "Hent", "nb": 314},
+  {"insee": "29024", "rummad": "Karter", "nb": 6},
+  {"insee": "29024", "rummad": "Koad", "nb": 1},
+  {"insee": "29024", "rummad": "Kumun", "nb": 1},
+  {"insee": "29024", "rummad": "Kêriadenn", "nb": 80},
+  {"insee": "29024", "rummad": "Maez", "nb": 11},
+  {"insee": "29024", "rummad": "Monumant/Savadur", "nb": 63},
+  {"insee": "29024", "rummad": "Takad", "nb": 18}
 ]
 ```
 
@@ -150,18 +220,31 @@ Tous les toponymes d'une commune, triés par `lec_hanv` : bloc `toponyms` de la 
 ```json
 [
   {
-    "niv": 3679,
-    "deiziad_degemer": "1987-05-02",
-    "insee": "22002",
-    "kumun": "Andel",
-    "stagadenn": null,
-    "lec_hanv": "Andel",
-    "stumm_orin": "Andel",
-    "rummad": "Kumun",
-    "stumm_dibab": "Andel"
+    "niv": 46627,
+    "deiziad_degemer": "2007-01-01",
+    "insee": "29024",
+    "kumun": "Karaez-Plougêr",
+    "stagadenn": "Place du",
+    "lec_hanv": "19-mars-62",
+    "stumm_orin": "Place du 19-mars-62",
+    "rummad": "Hent",
+    "stumm_dibab": "Plasenn an 19 a viz Meurzh 1962"
+  },
+  {
+    "niv": 46440,
+    "deiziad_degemer": "2007-01-01",
+    "insee": "29024",
+    "kumun": "Karaez-Plougêr",
+    "stagadenn": "Rue de l'",
+    "lec_hanv": "Abattoir",
+    "stumm_orin": "Rue de l'Abattoir",
+    "rummad": "Hent",
+    "stumm_dibab": "Straed an Ti-lazhañ"
   }
 ]
 ```
+
+La liste est abrégée dans cet exemple : la commune compte 498 toponymes.
 
 ## Licences
 
