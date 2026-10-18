@@ -2,7 +2,8 @@
 -- Not applicable in SQLite: CREATE USER, CREATE DATABASE, OWNER, schema "public".
 -- The database is simply the file opened with : sqlite3 kerofis.db < create_tables.sql
 
--- main table
+-- data source table
+-- data are loaded from CSV
 -- dates are stored as ISO 8601 text (YYYY-MM-DD), SQLite has no native date type
 
 DROP TABLE IF EXISTS kerofis;
@@ -20,6 +21,21 @@ CREATE TABLE kerofis (
     CONSTRAINT pk_niv PRIMARY KEY (niv)
 );
 
-CREATE INDEX idx_insee ON kerofis (insee);
-CREATE INDEX idx_stumm_didab ON kerofis (stumm_dibab);
-CREATE INDEX idx_stumm_orin ON kerofis (stumm_orin);
+-- the toponyms
+DROP TABLE IF EXISTS toponyms;
+CREATE TABLE toponyms (
+    id             INTEGER NOT NULL,
+    insee          TEXT NULL,
+    type_br        TEXT NULL,
+    name_br        TEXT NULL,
+    type_fr        TEXT NULL,
+    name_fr        TEXT NULL,
+    CONSTRAINT pk_id PRIMARY KEY (id)
+);
+
+CREATE INDEX idx_toponyms_insee   ON toponyms (insee);
+CREATE INDEX idx_toponyms_type_br ON toponyms (type_br);
+CREATE INDEX idx_toponyms_name_br ON toponyms (name_br);
+CREATE INDEX idx_toponyms_type_fr ON toponyms (type_fr);
+CREATE INDEX idx_toponyms_name_fr ON toponyms (name_fr);
+

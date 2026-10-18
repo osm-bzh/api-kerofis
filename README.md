@@ -17,7 +17,7 @@ scripts/              scripts utilitaires
   load_csv_into_db.py chargement du CSV le plus récent dans la base SQLite
 data/
   csv/                exports CSV de l'OPLB (toponymie_lechanvadurezh_AAAAMMJJ.csv)
-  sql/                scripts SQL : create_tables.sql, create_views.sql
+  sql/                scripts SQL : create_tables.sql, load_tables.sql, create_views.sql
   kerofis.db          base SQLite (générée, non versionnée)
 requirements.txt      dépendances Python
 ```
@@ -38,10 +38,18 @@ python scripts/load_csv_into_db.py
 
 Le script :
 
-1. recrée la base `data/kerofis.db` (tables et vues, à partir de `data/sql/`) ;
+1. recrée la base `data/kerofis.db` : supprime l'ancien fichier, puis crée les tables avec `data/sql/create_tables.sql` ;
 2. cherche dans `data/csv/` le fichier dont la date, dans le nom, est la plus récente ;
 3. charge ce fichier dans un dataframe pandas et le nettoie : espaces superflus, valeurs vides, dates au format ISO, reconstitution du nom français (`stumm_orin`) ;
-4. écrit le résultat dans la table `kerofis`.
+4. écrit le résultat dans la table `kerofis` ;
+5. exécute les requêtes de `data/sql/load_tables.sql`, qui alimentent les autres tables à partir de la table `kerofis` ;
+6. crée les vues avec `data/sql/create_views.sql`.
+
+### Les tables
+
+- `kerofis` : les données du CSV, une ligne par toponyme.
+- `toponyms` : table dérivée de `kerofis` (identifiant, code INSEE, type et nom en breton, type et nom en français), remplie par `data/sql/load_tables.sql`.
+`load_tables.sql` peut contenir plusieurs requêtes : elles sont toutes exécutées, dans l'ordre du fichier, après le chargement de `kerofis` et avant la création des vues. Une vue peut donc s'appuyer sur ces tables.
 
 La date du fichier est enregistrée dans la colonne `deiziad_restr` : elle sert de numéro de version des données.
 

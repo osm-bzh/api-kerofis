@@ -96,13 +96,26 @@ def main() -> None:
     DB_PATH.unlink(missing_ok=True)
 
     with sqlite3.connect(DB_PATH) as conn:
-        conn.executescript((SQL_DIR / "create_tables.sql").read_text(encoding="utf-8"))
-        df.to_sql("kerofis", conn, if_exists="append", index=False)
-        conn.executescript((SQL_DIR / "create_views.sql").read_text(encoding="utf-8"))
-        conn.execute("ANALYZE")
-    conn.close()
-    print(f"{len(df)} rows loaded into {DB_NAME}")
 
+        print(f"\nCreating tables")
+        conn.executescript((SQL_DIR / "create_tables.sql").read_text(encoding="utf-8"))
+
+        print(f"\nLoading kerofis table")
+        df.to_sql("kerofis", conn, if_exists="append", index=False)
+        print(f"{len(df)} rows loaded")
+
+        print(f"\nLoading other tables with derived data")
+        conn.executescript((SQL_DIR / "load_tables.sql").read_text(encoding="utf-8"))
+
+        print(f"\nCreating views")
+        conn.executescript((SQL_DIR / "create_views.sql").read_text(encoding="utf-8"))
+
+        print(f"\nExecuting ANALYZE")
+        conn.execute("ANALYZE")
+
+    conn.close()
+
+    print(f"\nDone!")
 
 if __name__ == "__main__":
     main()
