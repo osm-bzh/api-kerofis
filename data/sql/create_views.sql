@@ -5,7 +5,7 @@
 
 DROP VIEW IF EXISTS stats_municipality;
 DROP VIEW IF EXISTS stats_municipality_name_br;
-DROP VIEW IF EXISTS municipality;
+DROP VIEW IF EXISTS municipalities;
 DROP VIEW IF EXISTS infos_file_import;
 DROP VIEW IF EXISTS stats_municipality_type_of_place;
 DROP VIEW IF EXISTS stats_type_of_place;
@@ -25,7 +25,7 @@ CREATE VIEW infos_file_import AS
 -- this view to list all the municipality
 -- id, breton name, french name
 
-CREATE VIEW municipality AS
+CREATE VIEW municipalities AS
  SELECT kerofis.insee,
     kerofis.kumun AS name_br,
     kerofis.stumm_orin AS name_fr,

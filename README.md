@@ -76,7 +76,7 @@ Ce lanceur accepte aussi `--port` (80 par défaut) et `--reload`. Exemple : `pyt
 Chaque requête est affichée sur une ligne `[SQL]`, avec ses paramètres déjà remplacés :
 
 ```
-[SQL] SELECT insee, name_br, name_fr, nb_toponyms FROM municipality WHERE insee = '29024'
+[SQL] SELECT insee, name_br, name_fr, nb_toponyms FROM municipalities WHERE insee = '29024'
 ```
 
 `uvicorn` refuse les options qu'il ne connaît pas : avec la commande `uvicorn` directe, activer le mode avec la variable d'environnement `KEROFIS_DEBUG_SQL=1`.

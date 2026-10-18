@@ -76,14 +76,14 @@ def infos() -> dict:
 @router.get("/municipalities/")
 def municipalities() -> list[dict]:
     """List of all the municipalities : INSEE code, breton name and french name."""
-    rows = query_db("SELECT insee, name_br, name_fr, nb_toponyms FROM municipality")
+    rows = query_db("SELECT insee, name_br, name_fr, nb_toponyms FROM municipalities")
     return [dict(row) for row in rows]
 
 
 def get_municipality_infos(insee: str) -> dict | None:
     """General information about a municipality, None if the code is not a municipality."""
     rows = query_db(
-        "SELECT insee, name_br, name_fr, nb_toponyms FROM municipality WHERE insee = ?",
+        "SELECT insee, name_br, name_fr, nb_toponyms FROM municipalities WHERE insee = ?",
         (insee,),
     )
     return dict(rows[0]) if rows else None
@@ -199,7 +199,7 @@ def search_municipalities(
         )
 
     rows = query_db(
-        "SELECT insee, name_br, name_fr, nb_toponyms FROM municipality WHERE "
+        "SELECT insee, name_br, name_fr, nb_toponyms FROM municipalities WHERE "
         + " AND ".join(conditions)
         + f" ORDER BY {sort} COLLATE NOCASE, insee",
         tuple(params),
