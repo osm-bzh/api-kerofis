@@ -25,6 +25,8 @@ INSERT INTO toponyms_types (type_br, type_fr) VALUES
     ('Uhelenn', 'Point haut');
 
 
+-- delete pseudo municipalities
+DELETE FROM kerofis WHERE insee IN ('98888','99999') ;
 
 -- load table municipalities from the kerofis table : the places of type Kumun, with the number of toponyms of the municipality
 -- (same content as the former view municipalities)
@@ -85,4 +87,7 @@ INSERT INTO infos
 	FROM toponyms
 ;
 
+
+-- finally : truncate kerofis table
+DELETE FROM kerofis ;
 

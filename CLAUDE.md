@@ -47,9 +47,9 @@ Pour voir les requêtes SQL dans la console : `python -m app.main --debug-sql` (
 - **Doublons de `niv`** : le CSV a plusieurs lignes pour un même identifiant (autres formes bretonnes), alors que `niv` est la clé primaire. Aujourd'hui le script ne garde que la ligne à la date de validation la plus récente (environ 150 lignes perdues). Alternative : changer la clé primaire pour tout conserver.
 - **Préfixe `/api-kerofis`** : codé en dur dans l'application. À revoir (`root_path`) si l'API est mise derrière un reverse proxy qui retire déjà ce préfixe.
 - **`nb_toponyms` et `toponyms`** : `municipalities` est calculée sur `kerofis` (62 169 lignes) alors que `toponyms` ne garde que les lignes dont le type est connu (JOIN sur `toponyms_types`, 38 lignes sans type exclues) : le nombre annoncé peut dépasser de 1 ou 2 le nombre renvoyé. Calculer `nb_toponyms` depuis `toponyms` les alignerait.
-- **Doublons dans `municipalities`** : 2 039 lignes pour 1 363 codes INSEE, car plusieurs lieux hors communes partagent `98888` ou `99999`. D'où l'absence de clé primaire sur `insee`.
-- **Table `infos`** : la clé `kerofis_version` remplace l'ancienne `version_kerofis`. `value` est de type `TEXT` : les compteurs sont renvoyés comme des chaînes (`"2039"`). `municipalities_count` (2 039) compte les lignes de la table, pas les communes distinctes (1 363 codes INSEE) : voir les doublons de `municipalities`.
-- **Code INSEE `99999`** : désigne des lieux hors commune (étranger, régions…) ; ils apparaissent dans `/municipalities/`. Filtrer ou non, à décider.
+- **Table `infos`** : la clé `kerofis_version` remplace l'ancienne `version_kerofis`. `value` est de type `TEXT` : les compteurs sont renvoyés comme des chaînes (`"2039"`).
+- **Pseudo-communes** : `load_tables.sql` supprime de `kerofis` les codes INSEE `98888` et `99999` (étranger, régions…) avant de remplir les autres tables : ces lieux ne sont plus dans l'API. `municipalities` n'a donc plus de doublons de code INSEE (1 361 communes) ; une clé primaire sur `insee` serait possible. À revoir si ces lieux doivent être exposés.
+- **Table `kerofis` vidée** : `load_tables.sql` finit par `DELETE FROM kerofis`, donc la table est vide après chargement et le fichier de base garde de l'espace libre (un `VACUUM` le réduirait). Tout ce qui lit `kerofis` après le chargement ne trouve rien.
 - **Dependabot** : GitHub signale des alertes de sécurité à l'onglet Security du dépôt (non consultées).
 
 ## Conventions

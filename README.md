@@ -41,23 +41,25 @@ Le script :
 1. recrée la base `data/kerofis.db` : supprime l'ancien fichier, puis crée les tables avec `data/sql/create_tables.sql` ;
 2. cherche dans `data/csv/` le fichier dont la date, dans le nom, est la plus récente ;
 3. charge ce fichier dans un dataframe pandas et le nettoie : espaces superflus, valeurs vides, dates au format ISO, reconstitution du nom français (`stumm_orin`) ;
-4. écrit le résultat dans la table `kerofis` ;
-5. exécute les requêtes de `data/sql/load_tables.sql`, qui alimentent les autres tables à partir de la table `kerofis` ;
+4. écrit le résultat dans la table `kerofis`, qui sert de table de travail ;
+5. exécute les requêtes de `data/sql/load_tables.sql`, dans l'ordre : types de toponymes, suppression des pseudo-communes (codes INSEE `98888` et `99999`), puis remplissage des tables `municipalities`, `toponyms` et `infos` à partir de `kerofis`, et enfin vidage de la table `kerofis` ;
 6. crée les vues avec `data/sql/create_views.sql`.
 
 ### Les tables
 
-- `kerofis` : les données du CSV, une ligne par toponyme.
+- `kerofis` : les données du CSV, une ligne par toponyme. Cette table n'est qu'une table de travail : elle est vide une fois le chargement terminé, et l'API ne la lit pas.
 - `infos` : informations sur la base, sous la forme clé / valeur : `kerofis_version` (date du fichier KerOfis chargé), `import_date` (date du chargement), `municipalities_count` et `toponyms_count` (nombre de lignes des tables `municipalities` et `toponyms`). Remplie par `data/sql/load_tables.sql`.
-- `municipalities` : les communes (code INSEE, nom breton, nom français, nombre de toponymes), remplie par `data/sql/load_tables.sql` à partir des lignes de type `Kumun` de `kerofis`.
+- `municipalities` : les communes (code INSEE, nom breton, nom français, nombre de toponymes), remplie par `data/sql/load_tables.sql` à partir des lignes de type `Kumun` de `kerofis`. Un code INSEE n'y apparaît qu'une fois.
 - `toponyms_types` : table qui contient les types de toponymes en breton et en français ; remplie par `data/sql/load_tables.sql`.
 - `toponyms` : table dérivée de `kerofis` (colonnes `id`, `insee`, `type_br`, `name_br`, `type_fr`, `name_fr`), remplie par `data/sql/load_tables.sql`. C'est la table lue par l'API pour les toponymes.
 
-La date du fichier est enregistrée dans la colonne `deiziad_restr` de la table `kerofis` : elle sert de numéro de version des données, reprise dans la table `infos`.
+La date du fichier est enregistrée dans la colonne `deiziad_restr` de la table `kerofis` pendant le chargement : elle sert de numéro de version des données et est conservée dans la table `infos` (`kerofis_version`).
 
 Les vues, créées par `data/sql/create_views.sql`, calculent des statistiques à partir de `toponyms` : `stats_municipality_type_of_toponyms` (nombre de toponymes par commune et par type) et `stats_type_of_place` (nombre de toponymes par type, pour toute la base).
 
 `municipalities` est calculée à partir de `kerofis` (le nombre de toponymes y compte aussi les toponymes sans type), tandis que l'API lit les toponymes dans `toponyms`, qui ne contient que les toponymes dont le type est connu. Le nombre de toponymes d'une commune peut donc dépasser de quelques unités le nombre de toponymes renvoyés.
+
+**Pseudo-communes supprimées** : les codes INSEE `98888` et `99999` désignent des lieux qui ne sont pas des communes (étranger, régions…). Leurs lignes sont supprimées avant le remplissage des tables : ces lieux n'existent ni dans `municipalities` ni dans `toponyms`, et donc nulle part dans l'API (environ 2 750 toponymes de moins que dans le fichier source).
 
 Dans le fichier source, un même identifiant (`niv`) peut apparaître sur plusieurs lignes, quand il existe plusieurs formes bretonnes. Comme `niv` est la clé primaire de la table, seule la ligne dont la date de validation est la plus récente est conservée.
 
@@ -109,10 +111,10 @@ Informations générales : licence, attribution, puis toutes les lignes de la ta
 
 - `kerofis_version` : version des données, c'est-à-dire la date du fichier KerOfis chargé ;
 - `import_date` : date du chargement dans la base ;
-- `municipalities_count` : nombre de lignes de la table `municipalities` ;
+- `municipalities_count` : nombre de communes de la table `municipalities` ;
 - `toponyms_count` : nombre de toponymes de la table `toponyms`.
 
-Toutes les valeurs sont des textes, y compris les compteurs : la colonne `value` est de type `TEXT`. `municipalities_count` compte aussi les lieux hors communes qui partagent un même code INSEE (voir la table `municipalities`).
+Toutes les valeurs sont des textes, y compris les compteurs : la colonne `value` est de type `TEXT`.
 
 ```json
 {
@@ -123,8 +125,8 @@ Toutes les valeurs sont des textes, y compris les compteurs : la colonne `value`
   "name": "KerOfis data provided by Ofis publik ar brezhoneg",
   "import_date": "2026-10-19",
   "kerofis_version": "2026-09-25",
-  "municipalities_count": "2039",
-  "toponyms_count": "62131"
+  "municipalities_count": "1361",
+  "toponyms_count": "59383"
 }
 ```
 
