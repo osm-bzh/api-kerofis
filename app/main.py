@@ -64,10 +64,12 @@ def infos() -> dict:
 
     return {
         "attribution_br": "KerOfis gant osm-bzh",
-        "attribution_en": "KerOfis by osm-bzh",
         "attribution_fr": "KerOfis par osm-bzh",
-        "licence": "Open Database License (ODbL) v1.0",
-        "name": "KerOfis data provided by Ofis publik ar brezhoneg",
+        "attribution_en": "KerOfis by osm-bzh",
+        "name_br": "Roadennoù KerOfis eus Ofis Publik ar Brezhoneg, pourvezet gant OpenStreetMap e brezhoneg",
+        "name_fr": "Données KerOfis de l'Office Public de la Langue Bretonne, fournies par OpenStreetMap e brezhoneg",
+        "name_en": "KerOfis data from the Public Office for the Breton Language, provided by OpenStreetMap e brezhoneg",
+        "data_licence": "Open Database License (ODbL) v1.0",
         # each row of the infos table is a key of the response
         **{row["key"]: row["value"] for row in rows},
     }
