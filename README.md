@@ -48,6 +48,7 @@ Le script :
 ### Les tables
 
 - `kerofis` : les données du CSV, une ligne par toponyme.
+- `municipalities` : les communes (code INSEE, nom breton, nom français, nombre de toponymes), remplie par `data/sql/load_tables.sql` à partir des lignes de type `Kumun` de `kerofis`.
 - `toponyms_types` : table qui contient les types de toponymes en breton et en français ; remplie par `data/sql/load_tables.sql`.
 - `toponyms` : table dérivée de `kerofis` (colonnes `id`, `insee`, `type_br`, `name_br`, `type_fr`, `name_fr`), remplie par `data/sql/load_tables.sql`. C'est la table lue par l'API pour les toponymes.
 

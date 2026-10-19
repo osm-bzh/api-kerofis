@@ -92,7 +92,7 @@ def get_municipality_infos(insee: str) -> dict | None:
 def get_municipality_statistics(insee: str) -> list[dict]:
     """Number of toponyms per type for a municipality."""
     rows = query_db(
-        "SELECT insee, rummad, nb FROM stats_municipality_type_of_toponyms WHERE insee = ?",
+        "SELECT insee, type_br, type_fr, count FROM stats_municipality_type_of_toponyms WHERE insee = ?",
         (insee,),
     )
     return [dict(row) for row in rows]

@@ -26,6 +26,20 @@ INSERT INTO toponyms_types (type_br, type_fr) VALUES
 
 
 
+-- load table municipalities from the kerofis table : the places of type Kumun, with the number of toponyms of the municipality
+-- (same content as the former view municipalities)
+INSERT INTO municipalities
+SELECT
+    k.insee,
+    k.kumun AS name_br,
+    k.stumm_orin AS name_fr,
+    n.nb_toponyms
+FROM kerofis k
+    JOIN (SELECT insee, count(*) AS nb_toponyms FROM kerofis GROUP BY insee) n ON n.insee = k.insee
+WHERE k.rummad = 'Kumun'
+ORDER BY k.insee;
+
+
 -- load table toponyms from the kerofis table
 INSERT INTO toponyms
 SELECT
@@ -38,5 +52,4 @@ SELECT
 FROM kerofis k
 	JOIN toponyms_types t ON k.rummad = t.type_br
 ORDER BY insee, name_br;
-
 
