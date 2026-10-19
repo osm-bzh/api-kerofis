@@ -32,13 +32,13 @@ CREATE TABLE infos (
 
 
 -- the municipalities : INSEE code, breton name, french name and number of toponyms
--- no primary key on insee : some codes (98888, 99999...) are shared by several places which are not municipalities
 DROP TABLE IF EXISTS municipalities;
 CREATE TABLE municipalities (
     insee          TEXT NOT NULL,
     name_br        TEXT NULL,
     name_fr        TEXT NULL,
-    nb_toponyms    INTEGER NOT NULL
+    nb_toponyms    INTEGER NOT NULL,
+    CONSTRAINT pk_municipalities PRIMARY KEY (insee)
 );
 
 CREATE INDEX idx_municipalities_insee   ON municipalities (insee);
