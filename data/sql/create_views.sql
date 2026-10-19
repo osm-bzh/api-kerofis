@@ -37,8 +37,11 @@ CREATE VIEW stats_municipality_type_of_toponyms AS
 -- this view for global statistics on type of places
 
 CREATE VIEW stats_type_of_place AS
- SELECT kerofis.rummad,
-    count(kerofis.rummad) AS nb
-   FROM kerofis
-  GROUP BY kerofis.rummad
-  ORDER BY kerofis.rummad;
+	SELECT
+	  type_br,
+	  type_fr,
+		count(type_br) AS count
+	FROM toponyms
+	GROUP BY type_br
+	ORDER BY type_br;
+
