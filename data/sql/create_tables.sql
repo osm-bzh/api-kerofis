@@ -22,6 +22,15 @@ CREATE TABLE kerofis (
 );
 
 
+-- table infos
+DROP TABLE IF EXISTS infos;
+CREATE TABLE infos (
+    key   TEXT,
+    value TEXT,
+    CONSTRAINT pk_infos PRIMARY KEY (key)
+);
+
+
 -- the municipalities : INSEE code, breton name, french name and number of toponyms
 -- no primary key on insee : some codes (98888, 99999...) are shared by several places which are not municipalities
 DROP TABLE IF EXISTS municipalities;

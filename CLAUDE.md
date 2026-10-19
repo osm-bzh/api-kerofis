@@ -12,7 +12,8 @@ Le projet a été remis à zéro sur la branche `v2026.10` (commit « RAZ du pro
 
 - `app/main.py` : application FastAPI. Toutes les routes sont sous le préfixe `/api-kerofis` (constante `API_PREFIX`). L'accès à la base passe par `query_db()` (lecture seule).
 - `scripts/load_csv_into_db.py` : recrée `data/kerofis.db` à partir du CSV le plus récent de `data/csv/` (date dans le nom `..._AAAAMMJJ.csv`).
-- `data/sql/create_tables.sql`, `data/sql/create_views.sql` : schéma SQLite.
+- `data/sql/create_tables.sql` : tables (`kerofis`, `infos`, `municipalities`, `toponyms`, `toponyms_types`) ; `data/sql/load_tables.sql` : requêtes qui remplissent les tables autres que `kerofis` (exécutées dans l'ordre, ajouter ici les nouvelles) ; `data/sql/create_views.sql` : vues de statistiques.
+- Ordre du chargement : tables, CSV dans `kerofis`, `load_tables.sql`, vues. Pour une nouvelle table : la déclarer dans `create_tables.sql` et la remplir dans `load_tables.sql`.
 - `data/kerofis.db` : généré, ignoré par git. À recréer sur chaque machine.
 
 ## Reprendre sur une nouvelle machine
@@ -33,18 +34,21 @@ Pour voir les requêtes SQL dans la console : `python -m app.main --debug-sql` (
 ## Routes existantes
 
 - `GET /api-kerofis/` : accueil.
-- `GET /api-kerofis/infos/` : licence, attribution, `version_kerofis` (lue dans la vue `infos_file_import`).
+- `GET /api-kerofis/infos/` : licence, attribution, puis toutes les lignes de la table `infos` (clé/valeur : `kerofis_version`, `import_date`, `municipalities_count`, `toponyms_count`), chacune devenant une clé de la réponse.
 - `GET /api-kerofis/municipalities/` : liste de la table `municipalities` (`insee`, `name_br`, `name_fr`, `nb_toponyms`).
 - `GET /api-kerofis/municipality/{insee}/` : fiche d'une commune en 3 blocs (`infos`, `statistics`, `toponyms`) ; 404 si aucun toponyme.
-- `GET /api-kerofis/municipality/{insee}/infos/`, `.../statistics/`, `.../toponyms/` : chaque bloc séparément (logique partagée dans les fonctions `get_municipality_*`).
+- `GET /api-kerofis/municipality/{insee}/infos/`, `.../statistics/`, `.../toponyms/` : chaque bloc séparément (logique partagée dans les fonctions `get_municipality_*`). Les toponymes viennent de la table `toponyms` (`id`, `insee`, `type_br`, `name_br`, `type_fr`, `name_fr`) ; les statistiques de la vue `stats_municipality_type_of_toponyms` (`insee`, `type_br`, `type_fr`, `count`).
 - `GET /api-kerofis/search/municipalities/` : recherche de communes (`insee` par préfixe, `name_br` et `name_fr` par « contient », 2 caractères minimum, `sort`) ; réponse `{count, municipalities}`, 200 avec `count` à 0 si rien.
-- `GET /api-kerofis/search/toponyms/` : recherche de toponymes (`insee` par préfixe, `name_br`/`name_fr` par « contient » sur `stumm_dibab`/`stumm_orin`, `type` exact en minuscules sans accents sur `rummad` via la fonction SQL `normalize()`, `sort`, pagination `limit` 100 par défaut / 1000 max et `offset`) ; réponse `{count, toponyms}` avec `count` = total hors pagination.
+- `GET /api-kerofis/search/toponyms/` : recherche de toponymes (`insee` par préfixe, `name_br`/`name_fr` par « contient », `type` exact sur `type_br`, en minuscules sans accents, via la fonction SQL `normalize()` ; lit la table `toponyms`, `sort`, pagination `limit` 100 par défaut / 1000 max et `offset`) ; réponse `{count, toponyms}` avec `count` = total hors pagination.
 - `GET /api-kerofis/docs/` : Swagger (`redoc/` et `openapi.json` sous le même préfixe).
 
 ## Points à trancher
 
 - **Doublons de `niv`** : le CSV a plusieurs lignes pour un même identifiant (autres formes bretonnes), alors que `niv` est la clé primaire. Aujourd'hui le script ne garde que la ligne à la date de validation la plus récente (environ 150 lignes perdues). Alternative : changer la clé primaire pour tout conserver.
 - **Préfixe `/api-kerofis`** : codé en dur dans l'application. À revoir (`root_path`) si l'API est mise derrière un reverse proxy qui retire déjà ce préfixe.
+- **`nb_toponyms` et `toponyms`** : `municipalities` est calculée sur `kerofis` (62 169 lignes) alors que `toponyms` ne garde que les lignes dont le type est connu (JOIN sur `toponyms_types`, 38 lignes sans type exclues) : le nombre annoncé peut dépasser de 1 ou 2 le nombre renvoyé. Calculer `nb_toponyms` depuis `toponyms` les alignerait.
+- **Doublons dans `municipalities`** : 2 039 lignes pour 1 363 codes INSEE, car plusieurs lieux hors communes partagent `98888` ou `99999`. D'où l'absence de clé primaire sur `insee`.
+- **Table `infos`** : la clé `kerofis_version` remplace l'ancienne `version_kerofis`. `value` est de type `TEXT` : les compteurs sont renvoyés comme des chaînes (`"2039"`). `municipalities_count` (2 039) compte les lignes de la table, pas les communes distinctes (1 363 codes INSEE) : voir les doublons de `municipalities`.
 - **Code INSEE `99999`** : désigne des lieux hors commune (étranger, régions…) ; ils apparaissent dans `/municipalities/`. Filtrer ou non, à décider.
 - **Dependabot** : GitHub signale des alertes de sécurité à l'onglet Security du dépôt (non consultées).
 

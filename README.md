@@ -48,11 +48,16 @@ Le script :
 ### Les tables
 
 - `kerofis` : les données du CSV, une ligne par toponyme.
+- `infos` : informations sur la base, sous la forme clé / valeur : `kerofis_version` (date du fichier KerOfis chargé), `import_date` (date du chargement), `municipalities_count` et `toponyms_count` (nombre de lignes des tables `municipalities` et `toponyms`). Remplie par `data/sql/load_tables.sql`.
 - `municipalities` : les communes (code INSEE, nom breton, nom français, nombre de toponymes), remplie par `data/sql/load_tables.sql` à partir des lignes de type `Kumun` de `kerofis`.
 - `toponyms_types` : table qui contient les types de toponymes en breton et en français ; remplie par `data/sql/load_tables.sql`.
 - `toponyms` : table dérivée de `kerofis` (colonnes `id`, `insee`, `type_br`, `name_br`, `type_fr`, `name_fr`), remplie par `data/sql/load_tables.sql`. C'est la table lue par l'API pour les toponymes.
 
-La date du fichier est enregistrée dans la colonne `deiziad_restr` : elle sert de numéro de version des données.
+La date du fichier est enregistrée dans la colonne `deiziad_restr` de la table `kerofis` : elle sert de numéro de version des données, reprise dans la table `infos`.
+
+Les vues, créées par `data/sql/create_views.sql`, calculent des statistiques à partir de `toponyms` : `stats_municipality_type_of_toponyms` (nombre de toponymes par commune et par type) et `stats_type_of_place` (nombre de toponymes par type, pour toute la base).
+
+`municipalities` est calculée à partir de `kerofis` (le nombre de toponymes y compte aussi les toponymes sans type), tandis que l'API lit les toponymes dans `toponyms`, qui ne contient que les toponymes dont le type est connu. Le nombre de toponymes d'une commune peut donc dépasser de quelques unités le nombre de toponymes renvoyés.
 
 Dans le fichier source, un même identifiant (`niv`) peut apparaître sur plusieurs lignes, quand il existe plusieurs formes bretonnes. Comme `niv` est la clé primaire de la table, seule la ligne dont la date de validation est la plus récente est conservée.
 
@@ -100,16 +105,26 @@ Route d'accueil.
 
 ### `GET /api-kerofis/infos/`
 
-Informations générales : licence, attribution et version des données (date du dernier fichier importé).
+Informations générales : licence, attribution, puis toutes les lignes de la table `infos`. Chaque ligne de la table devient une clé de la réponse : on peut donc ajouter une information en ajoutant une ligne dans `data/sql/load_tables.sql`.
+
+- `kerofis_version` : version des données, c'est-à-dire la date du fichier KerOfis chargé ;
+- `import_date` : date du chargement dans la base ;
+- `municipalities_count` : nombre de lignes de la table `municipalities` ;
+- `toponyms_count` : nombre de toponymes de la table `toponyms`.
+
+Toutes les valeurs sont des textes, y compris les compteurs : la colonne `value` est de type `TEXT`. `municipalities_count` compte aussi les lieux hors communes qui partagent un même code INSEE (voir la table `municipalities`).
 
 ```json
 {
   "attribution_br": "KerOfis gant osm-bzh",
   "attribution_en": "KerOfis by osm-bzh",
   "attribution_fr": "KerOfis par osm-bzh",
-  "version_kerofis": "2026-09-25",
   "licence": "Open Database License (ODbL) v1.0",
-  "name": "KerOfis data provided by Ofis publik ar brezhoneg"
+  "name": "KerOfis data provided by Ofis publik ar brezhoneg",
+  "import_date": "2026-10-19",
+  "kerofis_version": "2026-09-25",
+  "municipalities_count": "2039",
+  "toponyms_count": "62131"
 }
 ```
 
@@ -129,7 +144,7 @@ Liste des communes : code INSEE, nom breton, nom français et nombre de toponyme
 Fiche complète d'une commune (infos, statistiques et toponymes), à partir de son code INSEE. La réponse contient :
 
 - `infos` : informations sur la commune (code INSEE, nom breton, nom français, nombre de toponymes), en premier ;
-- `statistics` : nombre de toponymes par type (`rummad`) ;
+- `statistics` : nombre de toponymes par type (`type_br`, `type_fr`, `count`) ;
 - `toponyms` : tous les toponymes de la commune, triés par `name_fr`.
 
 Renvoie une erreur 404 si le code ne correspond à aucun toponyme.
@@ -145,48 +160,57 @@ Renvoie une erreur 404 si le code ne correspond à aucun toponyme.
   "statistics": [
     {
       "insee": "29024",
-      "rummad": "Diseurt",
-      "nb": 4
+      "type_br": "Diseurt",
+      "type_fr": "Divers",
+      "count": 4
     },
     {
       "insee": "29024",
-      "rummad": "Hent",
-      "nb": 314
+      "type_br": "Hent",
+      "type_fr": "Chemin",
+      "count": 314
     },
     {
       "insee": "29024",
-      "rummad": "Karter",
-      "nb": 6
+      "type_br": "Karter",
+      "type_fr": "Quartier",
+      "count": 6
     },
     {
       "insee": "29024",
-      "rummad": "Koad",
-      "nb": 1
+      "type_br": "Koad",
+      "type_fr": "Bois",
+      "count": 1
     },
     {
       "insee": "29024",
-      "rummad": "Kumun",
-      "nb": 1
+      "type_br": "Kumun",
+      "type_fr": "Commune",
+      "count": 1
     },
     {
       "insee": "29024",
-      "rummad": "Kêriadenn",
-      "nb": 80
+      "type_br": "Kêriadenn",
+      "type_fr": "Village",
+      "count": 80
     },
     {
       "insee": "29024",
-      "rummad": "Maez",
-      "nb": 11
+      "type_br": "Maez",
+      "type_fr": "Champ",
+      "count": 11
     },
     {
       "insee": "29024",
-      "rummad": "Monumant/Savadur",
-      "nb": 63
+      "type_br": "Monumant/Savadur",
+      "type_fr": "Monument/Bâtiment",
+      "count": 63
     },
     {
       "insee": "29024",
-      "rummad": "Takad",
-      "nb": 18
+      "type_br": "Takad",
+      "type_fr": "Superficie",
+      "count": 18
     }
   ],
   "toponyms": [
@@ -222,19 +246,64 @@ Informations sur une commune : bloc `infos` de la route précédente. Renvoie un
 
 ### `GET /api-kerofis/municipality/{insee}/statistics/`
 
-Nombre de toponymes par type (`rummad`) pour une commune : bloc `statistics` de la route précédente. Renvoie une erreur 404 si le code INSEE est inconnu.
+Nombre de toponymes par type (`type_br`, `type_fr`, `count`) pour une commune : bloc `statistics` de la route précédente. Renvoie une erreur 404 si le code INSEE est inconnu.
 
 ```json
 [
-  {"insee": "29024", "rummad": "Diseurt", "nb": 4},
-  {"insee": "29024", "rummad": "Hent", "nb": 314},
-  {"insee": "29024", "rummad": "Karter", "nb": 6},
-  {"insee": "29024", "rummad": "Koad", "nb": 1},
-  {"insee": "29024", "rummad": "Kumun", "nb": 1},
-  {"insee": "29024", "rummad": "Kêriadenn", "nb": 80},
-  {"insee": "29024", "rummad": "Maez", "nb": 11},
-  {"insee": "29024", "rummad": "Monumant/Savadur", "nb": 63},
-  {"insee": "29024", "rummad": "Takad", "nb": 18}
+  {
+    "insee": "29024",
+    "type_br": "Diseurt",
+    "type_fr": "Divers",
+    "count": 4
+  },
+  {
+    "insee": "29024",
+    "type_br": "Hent",
+    "type_fr": "Chemin",
+    "count": 314
+  },
+  {
+    "insee": "29024",
+    "type_br": "Karter",
+    "type_fr": "Quartier",
+    "count": 6
+  },
+  {
+    "insee": "29024",
+    "type_br": "Koad",
+    "type_fr": "Bois",
+    "count": 1
+  },
+  {
+    "insee": "29024",
+    "type_br": "Kumun",
+    "type_fr": "Commune",
+    "count": 1
+  },
+  {
+    "insee": "29024",
+    "type_br": "Kêriadenn",
+    "type_fr": "Village",
+    "count": 80
+  },
+  {
+    "insee": "29024",
+    "type_br": "Maez",
+    "type_fr": "Champ",
+    "count": 11
+  },
+  {
+    "insee": "29024",
+    "type_br": "Monumant/Savadur",
+    "type_fr": "Monument/Bâtiment",
+    "count": 63
+  },
+  {
+    "insee": "29024",
+    "type_br": "Takad",
+    "type_fr": "Superficie",
+    "count": 18
+  }
 ]
 ```
 

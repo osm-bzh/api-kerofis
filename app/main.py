@@ -57,9 +57,8 @@ def query_db(sql: str, params: tuple = ()) -> list[sqlite3.Row]:
 
 @router.get("/infos/")
 def infos() -> dict:
-    """General information about the data : licence, attribution and version of the data file."""
-    # the view is sorted by import date, most recent first
-    rows = query_db("SELECT deiziad_restr FROM infos_file_import LIMIT 1")
+    """General information about the data : licence, attribution and all the rows of the infos table."""
+    rows = query_db("SELECT key, value FROM infos ORDER BY key")
     if not rows:
         raise HTTPException(status_code=503, detail="Database is empty")
 
@@ -67,9 +66,10 @@ def infos() -> dict:
         "attribution_br": "KerOfis gant osm-bzh",
         "attribution_en": "KerOfis by osm-bzh",
         "attribution_fr": "KerOfis par osm-bzh",
-        "version_kerofis": rows[0]["deiziad_restr"],
         "licence": "Open Database License (ODbL) v1.0",
         "name": "KerOfis data provided by Ofis publik ar brezhoneg",
+        # each row of the infos table is a key of the response
+        **{row["key"]: row["value"] for row in rows},
     }
 
 

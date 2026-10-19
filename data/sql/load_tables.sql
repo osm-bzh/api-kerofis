@@ -53,3 +53,36 @@ FROM kerofis k
 	JOIN toponyms_types t ON k.rummad = t.type_br
 ORDER BY insee, name_br;
 
+
+-- load table infos with version of KerOfis database
+INSERT INTO infos
+	SELECT
+		'kerofis_version' AS key,
+		deiziad_restr AS value
+	FROM kerofis
+	LIMIT 1;
+
+-- date of import
+INSERT INTO infos
+	SELECT
+		'import_date' AS key,
+		date('now','localtime') AS value
+;
+
+-- number of municipalities
+INSERT INTO infos
+	SELECT
+		'municipalities_count' AS key,
+		count(*) AS value
+	FROM municipalities
+;
+
+-- number of toponyms
+INSERT INTO infos
+	SELECT
+		'toponyms_count' AS key,
+		count(*) AS value
+	FROM toponyms
+;
+
+
